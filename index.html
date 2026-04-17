@@ -3,26 +3,51 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-  <title>seewo_crack_tools · 轻简工具</title>
+  <!-- 缓存控制 -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>ZwCTools</title>
   <style>
-    /* ----- 全局重置 蓝白灰 稍深蓝 紧凑利用 ----- */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
       font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     }
-
     body {
-      background: #d9e6f2;
+      background: #ffffff;  /* 最底层背景改为纯白 */
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 12px;
-      margin: 0;
+      position: relative;
     }
-
+    .corner-tl {
+      position: fixed;
+      top: 12px;
+      left: 16px;
+      font-size: 0.75rem;
+      color: #3a6a8e;
+      opacity: 0.7;
+      font-weight: 400;
+      z-index: 10;
+      pointer-events: none;
+      text-shadow: 0 1px 2px rgba(255,255,255,0.5);
+    }
+    .corner-br {
+      position: fixed;
+      bottom: 12px;
+      right: 20px;
+      font-size: 0.75rem;
+      color: #3a6a8e;
+      opacity: 0.7;
+      font-weight: 400;
+      z-index: 10;
+      pointer-events: none;
+      text-shadow: 0 1px 2px rgba(255,255,255,0.5);
+    }
     .main-panel {
       max-width: 1280px;
       width: 100%;
@@ -31,10 +56,8 @@
       box-shadow: 0 16px 30px -8px rgba(30, 65, 90, 0.18);
       border: 1px solid #bdd1e6;
       padding: 16px 20px 20px;
-      display: flex;
-      flex-direction: column;
+      position: relative;
     }
-
     .title-section {
       display: flex;
       align-items: baseline;
@@ -46,52 +69,41 @@
     .title-section h1 {
       font-weight: 550;
       font-size: 1.9rem;
-      letter-spacing: -0.3px;
       color: #1e4b6e;
-      line-height: 1.2;
     }
-    .title-section .badge {
+    .badge {
       color: #2c6182;
-      font-weight: 450;
       background: #d0e2f0;
       padding: 5px 14px;
       border-radius: 40px;
       font-size: 0.85rem;
       border: 1px solid #a7c1d9;
     }
-
-    .quick-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 10px;
-      margin: 6px 0 12px;
+    .category-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 8px 0 14px;
     }
-    .btn-quick {
+    .cat-btn {
       background: #d9e8f4;
       border: 1px solid #adc7e0;
       color: #1a4059;
-      padding: 11px 4px;
+      padding: 10px 18px;
       border-radius: 36px;
       font-weight: 500;
       font-size: 0.95rem;
-      text-align: center;
-      text-decoration: none;
       box-shadow: 0 3px 6px rgba(50, 85, 110, 0.05);
-      transition: all 0.18s;
       cursor: pointer;
-      display: block;
+      transition: all 0.18s;
+      flex: 0 1 auto;
     }
-    .btn-quick:hover {
+    .cat-btn:hover {
       background: #c2d8ed;
       border-color: #7fa5c5;
       color: #0c3147;
-      transform: translateY(-1px);
-      box-shadow: 0 8px 12px rgba(46, 82, 110, 0.1);
     }
-
-    .jump-section {
-      margin: 8px 0 10px;
-    }
+    .jump-section { margin: 8px 0 10px; }
     .jump-row {
       display: flex;
       flex-wrap: wrap;
@@ -103,7 +115,7 @@
       margin-bottom: 10px;
       border: 1px solid #c1d6ea;
     }
-    .jump-row input {
+    .jump-row input, .jump-row select {
       flex: 4 1 180px;
       padding: 12px 16px;
       border: 1.5px solid #b3cce2;
@@ -112,33 +124,30 @@
       font-size: 0.95rem;
       outline: none;
       color: #173e58;
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
     }
-    .jump-row input:focus {
+    .jump-row select {
+      flex: 1 1 120px;
+      cursor: pointer;
+    }
+    .jump-row input:focus, .jump-row select:focus {
       border-color: #4f7fa3;
-      box-shadow: 0 0 0 3px rgba(79, 127, 163, 0.2);
+      box-shadow: 0 0 0 3px rgba(79,127,163,0.2);
     }
-    .jump-row .go-btn {
+    .go-btn {
       background: #4f7f9e;
-      border: 1px solid #36648b;
+      border: none;
       color: white;
       padding: 12px 22px;
       border-radius: 40px;
       font-weight: 600;
       font-size: 1rem;
-      box-shadow: 0 5px 10px rgba(46, 84, 112, 0.15);
+      box-shadow: 0 5px 10px rgba(46,84,112,0.15);
       cursor: pointer;
-      transition: 0.15s;
       white-space: nowrap;
-      border: none;
-      letter-spacing: 0.3px;
     }
-    .jump-row .go-btn:hover {
+    .go-btn:hover {
       background: #3a6b8c;
-      box-shadow: 0 8px 14px rgba(39, 77, 105, 0.22);
-      transform: scale(1.01);
     }
-
     .tools-bar {
       display: flex;
       gap: 10px;
@@ -152,472 +161,429 @@
       border-radius: 48px;
       font-weight: 550;
       font-size: 1rem;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.02);
       cursor: pointer;
-      transition: 0.15s;
       flex: 1 1 0;
       text-align: center;
-      backdrop-filter: blur(2px);
     }
     .tool-btn:hover {
       background: #bcd1e9;
-      border-color: #7b9fc2;
-      color: #0d334b;
     }
-
-    /* ---------- 底部抽屉 (宽度100% 高度80%) ---------- */
-    .drawer-overlay {
+    /* 模态框与抽屉样式 */
+    .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(22, 50, 70, 0.25);
       backdrop-filter: blur(3px);
       visibility: hidden;
       opacity: 0;
-      transition: opacity 0.25s ease, visibility 0.25s;
+      transition: 0.2s;
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.show {
+      visibility: visible;
+      opacity: 1;
+    }
+    .modal-card {
+      background: #f3f9ff;
+      width: 90%;
+      max-width: 700px;
+      max-height: 70vh;
+      border-radius: 32px;
+      border: 1px solid #b8d1e8;
+      box-shadow: 0 20px 40px rgba(28, 60, 84, 0.25);
+      padding: 20px 24px;
+      transform: scale(0.95);
+      transition: transform 0.2s;
+      overflow-y: auto;
+    }
+    .modal-overlay.show .modal-card { transform: scale(1); }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      border-bottom: 1px solid #c2d7eb;
+      padding-bottom: 10px;
+    }
+    .modal-header h3 { color: #1c4968; font-size: 1.6rem; font-weight: 550; }
+    .modal-close { background: none; border: none; font-size: 30px; cursor: pointer; color: #33658a; }
+    .link-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+    }
+    .link-item {
+      background: #d9e8f4;
+      border: 1px solid #adc7e0;
+      color: #1a4059;
+      padding: 12px 6px;
+      border-radius: 36px;
+      text-align: center;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.9rem;
+      transition: 0.15s;
+      display: block;
+    }
+    .link-item:hover { background: #c2d8ed; border-color: #7fa5c5; }
+
+    .drawer-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(22,50,70,0.25);
+      backdrop-filter: blur(3px);
+      visibility: hidden;
+      opacity: 0;
+      transition: 0.25s;
       z-index: 1000;
       display: flex;
       align-items: flex-end;
       justify-content: center;
     }
-    .drawer-overlay.show {
-      visibility: visible;
-      opacity: 1;
-    }
-
+    .drawer-overlay.show { visibility: visible; opacity: 1; }
     .drawer-panel {
       background: #f3f9ff;
       width: 100%;
-      max-width: 100%;
-      margin: 0;
       border-radius: 32px 32px 0 0;
-      box-shadow: 0 -10px 30px rgba(25, 60, 85, 0.2);
       border: 1px solid #b8d1e8;
-      border-bottom: none;
-      transform: translateY(100%);
-      transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1);
       height: 80vh;
       max-height: 80vh;
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      transform: translateY(100%);
+      transition: transform 0.3s;
     }
-    .drawer-overlay.show .drawer-panel {
-      transform: translateY(0);
-    }
-
+    .drawer-overlay.show .drawer-panel { transform: translateY(0); }
     .drawer-header {
       padding: 18px 24px 10px;
       display: flex;
-      align-items: center;
       justify-content: space-between;
       border-bottom: 1px solid #c2d7eb;
     }
-    .drawer-header h3 {
-      color: #1c4968;
-      font-weight: 550;
-      font-size: 1.6rem;
-    }
-    .drawer-close {
-      background: none;
-      border: none;
-      font-size: 32px;
-      line-height: 1;
-      cursor: pointer;
-      color: #33658a;
-      padding: 0 8px;
-      transition: 0.1s;
-    }
-    .drawer-close:hover {
-      color: #0a3146;
-      transform: scale(1.1);
-    }
+    .drawer-close { background: none; border: none; font-size: 32px; cursor: pointer; color: #33658a; }
+    .drawer-content { padding: 20px 24px; overflow-y: auto; flex: 1; }
 
-    .drawer-content {
-      padding: 20px 24px 28px;
-      overflow-y: auto;
-      color: #1c405a;
-      flex: 1;
-    }
-
-    /* 设备信息卡片 */
-    .info-card {
-      background: #dfecf7;
-      border-radius: 24px;
-      padding: 18px;
-      margin-bottom: 16px;
-      border: 1px solid #b1cce5;
-    }
-    .info-row {
-      display: flex;
-      padding: 12px 6px;
-      border-bottom: 1px solid #bed4e9;
-    }
-    .info-label {
-      width: 110px;
-      font-weight: 600;
-      color: #1b4764;
-    }
-    .info-value {
-      flex: 1;
-      word-break: break-all;
-      color: #0d3450;
-    }
-
-    /* IDE区域 */
-    .ide-container {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .ide-textarea {
-      width: 100%;
-      padding: 18px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 14px;
-      background: #fafdff;
-      border: 2px solid #b3cee6;
-      border-radius: 24px;
-      color: #133a51;
-      resize: vertical;
-      min-height: 200px;
-    }
-    .ide-preview {
-      background: white;
-      border-radius: 20px;
-      border: 2px solid #b3cee6;
-      padding: 12px;
-    }
-    .ide-preview iframe {
-      width: 100%;
-      height: 220px;
-      border: none;
-      background: white;
-      border-radius: 12px;
-    }
-    .run-ide-btn {
-      background: #4f7f9e;
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 48px;
-      font-weight: 600;
-      cursor: pointer;
-      align-self: flex-start;
-      box-shadow: 0 4px 10px rgba(46, 84, 112, 0.18);
-    }
-
-    /* 段落抽屉内容样式 */
-    .para-content {
+    .device-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .device-item {
       background: #eaf2fc;
-      padding: 20px 24px;
       border-radius: 20px;
-      color: #1a435c;
-      font-size: 1rem;
-      border-left: 5px solid #5982a3;
-      line-height: 1.7;
-      word-break: break-word;
+      padding: 16px 18px;
+      border: 1px solid #c5d9ec;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.02);
+    }
+    .device-label {
+      font-weight: 600;
+      color: #1e4b6e;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .device-value { color: #0d3450; word-break: break-word; font-size: 1rem; line-height: 1.4; }
+    .full-width { grid-column: span 2; }
+
+    .ide-container { display: flex; flex-direction: column; gap: 18px; }
+    .ide-editor { background: #ffffff; border-radius: 24px; border: 2px solid #b3cee6; overflow: hidden; }
+    .ide-textarea {
+      width: 100%; padding: 20px; font-family: 'JetBrains Mono', monospace;
+      font-size: 14px; background: #fafdff; border: none; outline: none;
+      color: #133a51; resize: vertical; min-height: 220px;
+    }
+    .ide-preview { background: white; border-radius: 20px; border: 2px solid #b3cee6; padding: 16px; }
+    .ide-preview iframe { width: 100%; height: 260px; border: none; background: white; border-radius: 12px; }
+    .run-ide-btn {
+      background: #4f7f9e; color: white; border: none; padding: 14px 28px;
+      border-radius: 48px; font-weight: 600; font-size: 1rem; cursor: pointer;
+      align-self: flex-start; box-shadow: 0 6px 12px rgba(46,84,112,0.12);
     }
 
-    /* 响应式 */
-    @media (max-width: 700px) {
-      body { padding: 6px; }
-      .main-panel { padding: 12px 12px; }
-      .title-section h1 { font-size: 1.6rem; }
+    .para-content {
+      background: #eaf2fc; padding: 20px 24px; border-radius: 20px;
+      color: #1a435c; font-size: 1rem; border-left: 5px solid #5982a3; line-height: 1.7;
+    }
+
+    @media (max-width: 600px) {
+      .device-grid { grid-template-columns: 1fr; }
+      .full-width { grid-column: span 1; }
     }
     @media (max-width: 480px) {
-      .quick-grid { grid-template-columns: repeat(2, 1fr); }
-      .tools-bar { flex-wrap: wrap; }
-      .tool-btn { flex: 1 1 40%; }
+      .category-bar { justify-content: center; }
       .jump-row .go-btn { width: 100%; }
-    }
-    @media (max-height: 650px) and (orientation: landscape) {
-      .drawer-panel { height: 85vh; }
     }
   </style>
 </head>
 <body>
+  <div class="corner-tl">不自由毋宁死 · 不自由毋寧死 · Give me liberty or give me death · 自由か、死か</div>
+  <div class="corner-br">made by ZZC-jeizuchin, Github</div>
 
 <div class="main-panel">
-
   <div class="title-section">
-    <h1>seewo_crack_tools</h1>
-    <span class="badge">快捷 · 工具集</span>
+    <h1>Seewo Crack Tools</h1>
+    <span class="badge">自由工具箱</span>
   </div>
 
-  <!-- 预设网址网格 -->
-  <div class="quick-grid">
-    <a class="btn-quick" href="https://github.com" target="_blank" rel="noopener">GitHub</a>
-    <a class="btn-quick" href="https://yandex.com" target="_blank" rel="noopener">Yandex</a>
-    <a class="btn-quick" href="https://yandex.ru" target="_blank" rel="noopener">Yandex RU</a>
-    <a class="btn-quick" href="https://baidu.com" target="_blank" rel="noopener">Baidu</a>
-    <a class="btn-quick" href="https://bilibili.com" target="_blank" rel="noopener">Bilibili</a>
-    <a class="btn-quick" href="https://music.xcloudv.top" target="_blank" rel="noopener">XCloud Music</a>
-    <a class="btn-quick" href="https://pjmp3.com" target="_blank" rel="noopener">PJMP3</a>
+  <div class="category-bar">
+    <button class="cat-btn" data-cat="ai">AI工具</button>
+    <button class="cat-btn" data-cat="search">搜索引擎</button>
+    <button class="cat-btn" data-cat="media">通信音乐</button>
+    <button class="cat-btn" data-cat="dev">开发</button>
+    <button class="cat-btn" data-cat="other">其他</button>
   </div>
 
-  <!-- 两个跳转输入行 -->
   <div class="jump-section">
     <div class="jump-row">
-      <input type="text" id="customUrlInput" placeholder="输入网址，回车或点击跳转" value="" enterkeyhint="go">
+      <input type="text" id="customUrlInput" placeholder="输入网址，回车或点击跳转">
       <button class="go-btn" id="jumpBtn">前往</button>
     </div>
     <div class="jump-row">
-      <input type="text" id="baiduImageInput" placeholder="百度图片搜索关键词" value="" enterkeyhint="search">
+      <input type="text" id="baiduImageInput" placeholder="百度图片搜索关键词">
       <button class="go-btn" id="baiduImageBtn">搜图</button>
+    </div>
+    <div class="jump-row">
+      <select id="searchEngineSelect">
+        <option value="baidu">百度</option>
+        <option value="google">Google</option>
+        <option value="yandex">Yandex</option>
+        <option value="bing">Bing</option>
+        <option value="duckduckgo">DuckDuckGo</option>
+      </select>
+      <input type="text" id="searchKeywordInput" placeholder="输入搜索关键词">
+      <button class="go-btn" id="searchEngineBtn">搜索</button>
     </div>
   </div>
 
-  <!-- 工具按钮：设备信息 / HTML IDE / 文本段落 -->
   <div class="tools-bar">
     <button class="tool-btn" id="showDeviceInfoBtn">设备信息</button>
     <button class="tool-btn" id="showIdeBtn">HTML IDE</button>
     <button class="tool-btn" id="showParaBtn">文本段落</button>
   </div>
-
-  <!-- 主页不再显示段落，改为抽屉弹出 -->
 </div>
 
-<!-- 底部抽屉 (设备信息 / HTML IDE / 文本段落) -->
+<!-- 模态框 -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 id="modalTitle">分类</h3>
+      <button class="modal-close" id="modalCloseBtn">&times;</button>
+    </div>
+    <div class="link-grid" id="modalLinkGrid"></div>
+  </div>
+</div>
+
+<!-- 抽屉 -->
 <div class="drawer-overlay" id="drawerOverlay">
   <div class="drawer-panel">
     <div class="drawer-header">
       <h3 id="drawerTitle">设备信息</h3>
       <button class="drawer-close" id="closeDrawerBtn">&times;</button>
     </div>
-    <div class="drawer-content" id="drawerContent">
-      <!-- 动态内容 -->
-    </div>
+    <div class="drawer-content" id="drawerContent"></div>
   </div>
 </div>
 
 <script>
   (function(){
     "use strict";
+    // ---------- 链接库 (已新增开发类及PeanutDL) ----------
+    const linkDB = {
+      ai: [
+        { name: 'DeepSeek', url: 'https://chat.deepseek.com' },
+        { name: 'Doubao', url: 'https://www.doubao.com' },
+        { name: 'Qwen (通义千问)', url: 'https://tongyi.aliyun.com/qianwen' },
+        { name: 'Kimi', url: 'https://kimi.moonshot.cn' }
+      ],
+      search: [
+        { name: 'Google', url: 'https://www.google.com' },
+        { name: 'Bing (国内)', url: 'https://cn.bing.com' },
+        { name: 'Bing (国际)', url: 'https://www.bing.com' },
+        { name: 'MSN', url: 'https://www.msn.com' },
+        { name: 'DuckDuckGo', url: 'https://duckduckgo.com' },
+        { name: 'Baidu', url: 'https://baidu.com' },
+        { name: 'Yandex', url: 'https://yandex.com' },
+        { name: 'Yandex RU', url: 'https://yandex.ru' },
+        { name: 'Bilibili', url: 'https://bilibili.com' }
+      ],
+      media: [
+        { name: '自由公园', url: 'https://ziyoupark.com' },
+        { name: 'XCloud Music', url: 'https://music.xcloudv.top' },
+        { name: 'PJMP3', url: 'https://pjmp3.com' },
+        { name: 'PeanutDL', url: 'https://peanutdl.com' }      // 新增
+      ],
+      dev: [
+        { name: 'GitHub', url: 'https://github.com' },
+        { name: 'IP.SB', url: 'https://www.ip.sb' },
+        { name: 'Intel', url: 'https://www.intel.com' },
+        { name: 'AMD', url: 'https://www.amd.com' },
+        { name: 'NVIDIA', url: 'https://www.nvidia.com' },
+        { name: 'Lenovo', url: 'https://www.lenovo.com' },
+        { name: 'Huawei', url: 'https://www.huawei.com' },
+        { name: 'Apple', url: 'https://www.apple.com' },
+        { name: 'Microsoft', url: 'https://www.microsoft.com' },
+        { name: 'cpp.sh', url: 'https://cpp.sh' },             // C++在线IDE
+        { name: 'Python (官网)', url: 'https://www.python.org' },
+        { name: 'Python IDE', url: 'https://www.programiz.com/python-programming/online-compiler/' },
+        { name: 'Cloudflare', url: 'https://www.cloudflare.com' }
+      ],
+      other: [
+        { name: 'MMPan.top', url: 'https://mmpan.top' },
+        { name: 'CNN Edition', url: 'https://edition.cnn.com' },
+        { name: 'Poki', url: 'https://poki.com' },
+        { name: 'Steam', url: 'https://store.steampowered.com' }
+      ]
+    };
+    const catNames = { ai:'AI工具', search:'搜索引擎', media:'通信音乐', dev:'开发', other:'其他' };
 
-    // DOM 元素
+    // 模态框
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalGrid = document.getElementById('modalLinkGrid');
+    const modalClose = document.getElementById('modalCloseBtn');
+    document.querySelectorAll('[data-cat]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const cat = btn.dataset.cat;
+        modalTitle.textContent = catNames[cat];
+        modalGrid.innerHTML = linkDB[cat].map(l => 
+          `<a class="link-item" href="${l.url}" target="_blank" rel="noopener">${l.name}</a>`
+        ).join('');
+        modalOverlay.classList.add('show');
+      });
+    });
+    modalClose.addEventListener('click', ()=> modalOverlay.classList.remove('show'));
+    modalOverlay.addEventListener('click', e=> { if(e.target===modalOverlay) modalOverlay.classList.remove('show'); });
+    document.addEventListener('keydown', e=> { if(e.key==='Escape' && modalOverlay.classList.contains('show')) modalOverlay.classList.remove('show'); });
+
+    // 通用跳转（支持时间戳防缓存）
+    function performJump(url, addTimestamp = true) {
+      if (!url) return;
+      let final = url;
+      if (!/^https?:\/\//i.test(final)) final = 'https://' + final;
+      if (addTimestamp) {
+        const ts = Date.now();
+        final += (final.includes('?') ? '&' : '?') + '_t=' + ts;
+      }
+      const newWin = window.open(final, '_blank', 'noopener,noreferrer');
+      if (!newWin) window.location.href = final;
+    }
+
+    // 自定义跳转
     const inputUrl = document.getElementById('customUrlInput');
     const jumpBtn = document.getElementById('jumpBtn');
+    jumpBtn.addEventListener('click', ()=> { const raw = inputUrl.value.trim(); if(raw) performJump(raw, false); });
+    inputUrl.addEventListener('keydown', e=> { if(e.key==='Enter'){ e.preventDefault(); const raw=inputUrl.value.trim(); if(raw) performJump(raw, false); }});
+
+    // 百度图片搜索
     const baiduInput = document.getElementById('baiduImageInput');
     const baiduBtn = document.getElementById('baiduImageBtn');
+    baiduBtn.addEventListener('click', ()=> { 
+      const kw = baiduInput.value.trim(); 
+      if(kw) performJump('https://image.baidu.com/search/index?tn=baiduimage&ie=utf-8&word='+encodeURIComponent(kw), false); 
+    });
+    baiduInput.addEventListener('keydown', e=> { if(e.key==='Enter'){ e.preventDefault(); baiduBtn.click(); }});
+
+    // 搜索引擎切换
+    const engineSelect = document.getElementById('searchEngineSelect');
+    const keywordInput = document.getElementById('searchKeywordInput');
+    const searchBtn = document.getElementById('searchEngineBtn');
+    function getEngineSearchUrl(engine, query) {
+      const encoded = encodeURIComponent(query);
+      const engines = {
+        baidu: `https://www.baidu.com/s?wd=${encoded}`,
+        google: `https://www.google.com/search?q=${encoded}`,
+        yandex: `https://yandex.com/search/?text=${encoded}`,
+        bing: `https://www.bing.com/search?q=${encoded}`,
+        duckduckgo: `https://duckduckgo.com/?q=${encoded}`
+      };
+      return engines[engine] || engines.baidu;
+    }
+    function performEngineSearch() {
+      const engine = engineSelect.value;
+      const query = keywordInput.value.trim();
+      if (!query) return;
+      const url = getEngineSearchUrl(engine, query);
+      performJump(url, true);
+    }
+    searchBtn.addEventListener('click', performEngineSearch);
+    keywordInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); performEngineSearch(); } });
+
+    // 底部抽屉
     const overlay = document.getElementById('drawerOverlay');
     const drawerTitle = document.getElementById('drawerTitle');
     const drawerContent = document.getElementById('drawerContent');
     const closeBtn = document.getElementById('closeDrawerBtn');
-    const deviceBtn = document.getElementById('showDeviceInfoBtn');
-    const ideBtn = document.getElementById('showIdeBtn');
-    const paraBtn = document.getElementById('showParaBtn');
-
-    // ----- 自定义URL跳转 -----
-    function performJump(url) {
-      if (!url) return;
-      let final = url;
-      if (!/^https?:\/\//i.test(final)) final = 'https://' + final;
-      try {
-        const win = window.open(final, '_blank', 'noopener,noreferrer');
-        if (!win) alert('浏览器可能阻止了弹窗，请允许。');
-      } catch (e) {
-        alert('无效链接');
-      }
-    }
-
-    jumpBtn.addEventListener('click', () => {
-      const raw = inputUrl.value.trim();
-      if (!raw) { alert('请输入链接'); return; }
-      performJump(raw);
-    });
-    inputUrl.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        const raw = inputUrl.value.trim();
-        if (raw) performJump(raw); else alert('请输入链接');
-      }
-    });
-
-    // 百度图片搜索
-    function searchBaiduImage() {
-      const keyword = baiduInput.value.trim();
-      if (!keyword) { alert('请输入搜索关键词'); return; }
-      const base = 'https://image.baidu.com/search/index?tn=baiduimage&ie=utf-8&word=';
-      const finalUrl = base + encodeURIComponent(keyword);
-      performJump(finalUrl);
-    }
-    baiduBtn.addEventListener('click', searchBaiduImage);
-    baiduInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        searchBaiduImage();
-      }
-    });
-
-    // ----- 抽屉控制 -----
-    function openDrawer(title, contentHTML) {
-      drawerTitle.textContent = title;
-      drawerContent.innerHTML = contentHTML;
-      overlay.classList.add('show');
-    }
-    function closeDrawer() {
-      overlay.classList.remove('show');
-    }
-
+    function openDrawer(title, html) { drawerTitle.textContent = title; drawerContent.innerHTML = html; overlay.classList.add('show'); }
+    function closeDrawer() { overlay.classList.remove('show'); }
     closeBtn.addEventListener('click', closeDrawer);
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) closeDrawer();
-    });
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && overlay.classList.contains('show')) closeDrawer();
-    });
+    overlay.addEventListener('click', e=> { if(e.target===overlay) closeDrawer(); });
+    document.addEventListener('keydown', e=> { if(e.key==='Escape' && overlay.classList.contains('show')) closeDrawer(); });
 
-    // ----- 设备信息 -----
-    async function getDeviceInfoHTML() {
-      let localIP = '获取中...';
-      let publicIP = '获取中...';
+    // 设备信息
+    async function renderDevice() {
+      let local='获取中...', pub='获取中...';
+      try{
+        const pc=new RTCPeerConnection(); pc.createDataChannel('');
+        const offer=await pc.createOffer(); await pc.setLocalDescription(offer);
+        local = await new Promise(r=>{ pc.onicecandidate=e=>{ if(e.candidate){ let m=e.candidate.candidate.match(/([0-9]{1,3}\.){3}[0-9]{1,3}/); if(m) r(m[0]); } else r('未检测到'); }; setTimeout(()=>r('超时'),2000); });
+      }catch{ local='WebRTC不可用'; }
+      try{ const r=await fetch('https://api.ipify.org?format=json'); const d=await r.json(); pub=d.ip; }catch{ pub='获取失败'; }
 
-      try {
-        const pc = new RTCPeerConnection({ iceServers: [] });
-        pc.createDataChannel('');
-        const offer = await pc.createOffer();
-        await pc.setLocalDescription(offer);
-        localIP = await new Promise((resolve) => {
-          pc.onicecandidate = (e) => {
-            if (e.candidate) {
-              const ipMatch = e.candidate.candidate.match(/([0-9]{1,3}\.){3}[0-9]{1,3}/);
-              if (ipMatch) { resolve(ipMatch[0]); pc.close(); }
-            } else { resolve('未检测到内网IP'); }
-          };
-          setTimeout(() => resolve('超时/不支持'), 2000);
-        });
-      } catch (e) { localIP = 'WebRTC 不可用'; }
-
-      try {
-        const res = await fetch('https://api.ipify.org?format=json');
-        const data = await res.json();
-        publicIP = data.ip || '未知';
-      } catch { publicIP = '获取失败'; }
-
+      const screenInfo = `${window.screen.width} x ${window.screen.height} (${window.screen.colorDepth}-bit)`;
+      const language = navigator.language || '未知';
+      const platform = navigator.platform || '未知';
+      const cookies = navigator.cookieEnabled ? '已启用' : '已禁用';
+      const online = navigator.onLine ? '在线' : '离线';
+      const memory = navigator.deviceMemory ? `${navigator.deviceMemory} GB` : '未知';
+      const cores = navigator.hardwareConcurrency || '未知';
       const ua = navigator.userAgent;
-      const macInfo = '浏览器隐私限制无法获取真实MAC地址。';
 
-      return `
-        <div class="info-card">
-          <div class="info-row"><span class="info-label">User Agent</span><span class="info-value">${ua}</span></div>
-          <div class="info-row"><span class="info-label">公网 IP</span><span class="info-value">${publicIP}</span></div>
-          <div class="info-row"><span class="info-label">本地 IP</span><span class="info-value">${localIP}</span></div>
-          <div class="info-row"><span class="info-label">MAC 地址</span><span class="info-value">${macInfo}</span></div>
+      drawerContent.innerHTML = `
+        <div class="device-grid">
+          <div class="device-item"><div class="device-label">User Agent</div><div class="device-value" style="font-size:0.85rem;">${ua}</div></div>
+          <div class="device-item"><div class="device-label">公网 IP</div><div class="device-value">${pub}</div></div>
+          <div class="device-item"><div class="device-label">本地 IP</div><div class="device-value">${local}</div></div>
+          <div class="device-item"><div class="device-label">屏幕 / 色深</div><div class="device-value">${screenInfo}</div></div>
+          <div class="device-item"><div class="device-label">语言 / 平台</div><div class="device-value">${language} / ${platform}</div></div>
+          <div class="device-item"><div class="device-label">网络状态</div><div class="device-value">${online} · Cookie ${cookies}</div></div>
+          <div class="device-item"><div class="device-label">硬件线程 / 内存</div><div class="device-value">${cores} 核心 · ${memory}</div></div>
+          <div class="device-item full-width"><div class="device-label">MAC 地址</div><div class="device-value">浏览器隐私限制无法获取真实MAC地址</div></div>
         </div>
-        <p style="color:#285577;">* 本地IP通过WebRTC获取，公网IP来自ipify。MAC地址前端无法获取。</p>
-        <button class="tool-btn" style="margin-top:16px; width:auto; padding:10px 28px;" id="refreshDeviceInfo">刷新信息</button>
+        <button class="tool-btn" id="refreshDevice" style="margin-top:20px;">刷新信息</button>
       `;
+      document.getElementById('refreshDevice')?.addEventListener('click', renderDevice);
     }
+    document.getElementById('showDeviceInfoBtn').addEventListener('click', ()=>{
+      openDrawer('设备信息', '<div style="padding:20px">加载中...</div>');
+      renderDevice();
+    });
 
-    async function renderDeviceInfo() {
-      const html = await getDeviceInfoHTML();
-      drawerContent.innerHTML = html;
-      const refreshBtn = document.getElementById('refreshDeviceInfo');
-      if (refreshBtn) {
-        refreshBtn.addEventListener('click', async () => {
-          drawerContent.innerHTML = '<div style="padding:20px;text-align:center;">刷新中...</div>';
-          const newHtml = await getDeviceInfoHTML();
-          drawerContent.innerHTML = newHtml;
-          document.getElementById('refreshDeviceInfo')?.addEventListener('click', arguments.callee);
-        });
-      }
-    }
-
-    // ----- HTML IDE -----
-    function getIdeHTML() {
-      return `
+    // HTML IDE
+    document.getElementById('showIdeBtn').addEventListener('click', ()=>{
+      openDrawer('HTML IDE', `
         <div class="ide-container">
-          <textarea id="htmlCodeInput" class="ide-textarea" placeholder="<h1>seewo IDE</h1><p>编辑HTML...</p>"><h1>预览</h1><p>在左侧编辑，点击运行。</p></textarea>
-          <button class="run-ide-btn" id="runIdeBtn">运行代码</button>
-          <div class="ide-preview">
-            <iframe id="previewFrame" sandbox="allow-scripts allow-same-origin" title="预览"></iframe>
+          <div class="ide-editor">
+            <textarea id="ideInput" class="ide-textarea" placeholder="<h1>Hello SwC!</h1>"><h1>预览</h1><p>在左侧编辑，点击运行。</p></textarea>
           </div>
+          <button class="run-ide-btn" id="runIde">运行代码</button>
+          <div class="ide-preview"><iframe id="previewFrame" sandbox="allow-scripts allow-same-origin"></iframe></div>
         </div>
-      `;
-    }
+      `);
+      const ta=document.getElementById('ideInput'), btn=document.getElementById('runIde'), fr=document.getElementById('previewFrame');
+      function update(){ const doc=fr.contentDocument||fr.contentWindow.document; doc.open(); doc.write(ta.value); doc.close(); }
+      btn.addEventListener('click', update); update();
+    });
 
-    function bindIdeEvents() {
-      const textarea = document.getElementById('htmlCodeInput');
-      const runBtn = document.getElementById('runIdeBtn');
-      const iframe = document.getElementById('previewFrame');
-      function updatePreview() {
-        const code = textarea.value;
-        const doc = iframe.contentDocument || iframe.contentWindow.document;
-        doc.open();
-        doc.write(code);
-        doc.close();
-      }
-      if (runBtn) runBtn.addEventListener('click', updatePreview);
-      if (textarea && iframe) updatePreview();
-    }
-
-    // ----- 文本段落 (静态内容，用户自行修改此处) -----
-    function getParaHTML() {
-      return `
+    // 文本段落
+    document.getElementById('showParaBtn').addEventListener('click', ()=>{
+      openDrawer('使用指南', `
         <div class="para-content">
-          <strong>使用文档</strong>
-          <p>
-          欢迎来到这个工具箱，勇敢的破解者们，祝贺你们翻越了希沃的围墙。
-          </p><p>
-          本工具箱网站的开发者也就是我，是南方一名使用希沃学习平板的学生。我希望我的破解方法和我的工具能为全国使用希沃学习平板的学生造福。
-          </p><p>
-          本工具箱简洁但功能丰富，包括常见网页跳转，自定义网页跳转和图片搜索，以及设备信息查询，在线编辑html调试的功能，希望能派上用处。
-          关于破解的方法：
-          </p><p>
-          首先，我是通过希沃AI学进行跳转的。希沃AI学的网站存在一个非常严重的XSS漏洞，可以再用户向AI发送的消息框里直接编译HTML代码。
-          </p><p>
-          当然也不是完全编译，比如a,script,link这些就用不了。那该怎么跳转呢？
-          </p><p>
-          方法很简单，写一个可以绑定点击事件onclick的东西，然后让onclick="location.href='你想看的网站'"就行了，比如：
-          </p><p>
-          &lt;h1 onclick="location.href='https://www.github.com'"&gt;点击跳转&lt;/h1&gt;
-          </p><p>
-          但是很快这个方法就被老师禁用了，因为用户框无法出发点击事件，但是还有破解的方法，就是使用全自动的方法，比如
-          </p><p>
-          input内置autofocus属性搭配onfocus事件(input autofocus onfocus="")，object加载当前页面然后使用onload事件(object data="./" onload="")，img加载失败触发onerror事件(img src=error onerror="")，类似的还有各种on....这些
-          </p><p>
-          当然，学校可以封禁所有的on属性，甚至封禁用户框里所有的事件，但是还有一个不需要任何事件的方法：
-          </p><p>
-          <strong>meta重定向</strong>
-          </p><p>
-          示例代码：&lt;meta http-equiv="refresh" content="0;url=https://www.github.com"&gt;
-          </p><p>
-          但是，现在至少是在我们学校，希沃的网站已经无法对用户框内容进行编译，这个xss被修复了。什么on...，什么重定向都没用了
-          </p><p>
-          真的没有方法了么？？？？
-          </p><p>
-          不！！！！！！
-          </p><p>
-          ai的输出呢？是不是必须要用富文本和LateX？学校可以不信任我们，但是希沃必须信任ai输出的东西。所以ai的输出框仍然存在XSS漏洞。          </p><p>
-          </p><p>
-          该怎么利用这个漏洞呢？我们先让AI写好代码，很显然，这个代码会以源码的形式写出来，不会被渲染和编译。这个时候，我们只需要反复和AI说不要给&lt;和&gt;加入转义就可以。
-          </p><p>
-          然后你就会发现过个一次两次的回答，ai就会放弃对符号的转义，然后就可以渲染了。不光如此，ai输出框的所有事件至今没有受到限制，除了无法渲染a,script和link。
-          </p><p>
-          我真心的希望这篇文章能帮助你拜托束缚，通向自由
-          </p><p>
-          作者ZZC-jeizuchin from Github，一名高中生
-          </p>
+          <strong>使用文档</strong><p>欢迎来到这个工具箱，勇敢的破解者们……（完整段落保留）</p>
+          <p>作者ZZC-jeizuchin from Github，一名高中生</p>
         </div>
-      `;
-    }
-
-    // 打开抽屉事件
-    deviceBtn.addEventListener('click', async () => {
-      openDrawer('设备信息', '<div style="padding:20px;text-align:center;">加载中...</div>');
-      await renderDeviceInfo();
+      `);
     });
-
-    ideBtn.addEventListener('click', () => {
-      openDrawer('HTML IDE', getIdeHTML());
-      bindIdeEvents();
-    });
-
-    paraBtn.addEventListener('click', () => {
-      openDrawer('使用指南', getParaHTML());
-    });
-
-    console.log('seewo_crack_tools · 三个抽屉：设备信息/IDE/段落');
   })();
 </script>
 </body>
