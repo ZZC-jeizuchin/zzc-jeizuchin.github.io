@@ -105,6 +105,23 @@
       pointer-events: none;
       text-shadow: 0 1px 2px rgba(255,255,255,0.5);
     }
+    .corner-tr {
+      position: fixed;
+      top: 12px;
+      right: 20px;
+      font-size: 0.75rem;
+      color: var(--corner-text-color);
+      opacity: 0.7;
+      font-weight: 400;
+      z-index: 10;
+      pointer-events: none;
+      text-shadow: 0 1px 2px rgba(255,255,255,0.5);
+      background: var(--panel-bg);
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--panel-border);
+      backdrop-filter: blur(2px);
+    }
     .corner-br {
       position: fixed;
       bottom: 12px;
@@ -435,6 +452,7 @@
 </head>
 <body>
   <div class="corner-tl">不自由毋宁死 · 不自由毋寧死 · Give me liberty or give me death · 自由か、死か</div>
+  <div class="corner-tr" id="fpsDisplay">FPS: --</div>
   <div class="corner-br">made by ZZC-jeizuchin, Github</div>
   <button class="theme-toggle" id="themeToggle" aria-label="切换深色模式">🌙 深色</button>
 
@@ -505,6 +523,23 @@
   (function(){
     "use strict";
 
+    // ---------- 帧率监测 (右上角) ----------
+    const fpsDisplay = document.getElementById('fpsDisplay');
+    let frameCount = 0;
+    let lastFpsUpdate = performance.now();
+    function updateFPS() {
+      frameCount++;
+      const now = performance.now();
+      if (now - lastFpsUpdate >= 1000) {
+        const fps = Math.round((frameCount * 1000) / (now - lastFpsUpdate));
+        fpsDisplay.textContent = `FPS: ${fps}`;
+        frameCount = 0;
+        lastFpsUpdate = now;
+      }
+      requestAnimationFrame(updateFPS);
+    }
+    requestAnimationFrame(updateFPS);
+
     // ---------- 深色模式切换 ----------
     const themeToggle = document.getElementById('themeToggle');
     const currentTheme = localStorage.getItem('swc_theme') || 'light';
@@ -568,7 +603,7 @@
     };
     const catNames = { ai:'AI工具', search:'搜索引擎', media:'通信音乐', dev:'开发', other:'其他' };
 
-    // ---------- 模态框 (懒加载: 点击分类才构建) ----------
+    // ---------- 模态框 (懒加载) ----------
     const modalOverlay = document.getElementById('modalOverlay');
     const modalTitle = document.getElementById('modalTitle');
     const modalGrid = document.getElementById('modalLinkGrid');
@@ -731,6 +766,27 @@
       } catch { return '需要摄像头/麦克风权限'; }
     }
 
+    async function getStorageInfo() {
+      if (!navigator.storage || !navigator.storage.estimate) return '不支持';
+      try {
+        const estimate = await navigator.storage.estimate();
+        const used = estimate.usage / 1024 / 1024;
+        const quota = estimate.quota / 1024 / 1024;
+        return `已用 ${used.toFixed(1)} MB / 总额 ${quota.toFixed(1)} MB`;
+      } catch { return '获取失败'; }
+    }
+
+    async function getScreenBrightness() {
+      if ('getScreenBrightness' in window) {
+        try {
+          // @ts-ignore (实验性API)
+          const brightness = await window.getScreenBrightness();
+          return `${Math.round(brightness * 100)}%`;
+        } catch {}
+      }
+      return '不支持';
+    }
+
     async function renderDevice() {
       drawerContent.innerHTML = `<div class="loading-placeholder"><div class="loading-spinner"></div>正在获取设备信息...</div>`;
       
@@ -747,6 +803,8 @@
       const network = getNetworkType();
       const gpu = getGPUInfo();
       const media = await getMediaDevices();
+      const storage = await getStorageInfo();
+      const brightness = await getScreenBrightness();
       
       const logicalWidth = window.screen.width;
       const logicalHeight = window.screen.height;
@@ -773,6 +831,8 @@
           <div class="device-item"><div class="device-label">电池</div><div class="device-value">${battery}</div></div>
           <div class="device-item"><div class="device-label">网络类型</div><div class="device-value">${network}</div></div>
           <div class="device-item"><div class="device-label">GPU</div><div class="device-value" style="font-size:0.8rem;">${gpu}</div></div>
+          <div class="device-item"><div class="device-label">存储空间</div><div class="device-value">${storage}</div></div>
+          <div class="device-item"><div class="device-label">屏幕亮度</div><div class="device-value">${brightness}</div></div>
           <div class="device-item full-width"><div class="device-label">媒体设备</div><div class="device-value" style="font-size:0.8rem;">${media}</div></div>
           <div class="device-item"><div class="device-label">语言</div><div class="device-value">${language}</div></div>
           <div class="device-item"><div class="device-label">在线/Cookie</div><div class="device-value">${online} · ${cookies}</div></div>
