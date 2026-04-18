@@ -12,6 +12,72 @@
   <meta name="bingbot" content="noindex, nofollow">
   <title>SwCTools</title>
   <style>
+    /* 基础变量 - 亮色模式 (默认) */
+    :root {
+      --bg-body: #ffffff;
+      --panel-bg: #f5faff;
+      --panel-border: #bdd1e6;
+      --title-color: #1e4b6e;
+      --badge-bg: #d0e2f0;
+      --badge-color: #2c6182;
+      --cat-btn-bg: #d9e8f4;
+      --cat-btn-border: #adc7e0;
+      --cat-btn-color: #1a4059;
+      --cat-btn-hover-bg: #c2d8ed;
+      --jump-row-bg: #e7f0f9;
+      --jump-row-border: #c1d6ea;
+      --input-border: #b3cce2;
+      --input-focus-border: #4f7fa3;
+      --go-btn-bg: #4f7f9e;
+      --go-btn-hover-bg: #3a6b8c;
+      --tool-btn-bg: #cddef0;
+      --tool-btn-border: #a3bed8;
+      --tool-btn-color: #1a4765;
+      --modal-overlay-bg: rgba(22, 50, 70, 0.25);
+      --modal-card-bg: #f3f9ff;
+      --link-item-bg: #d9e8f4;
+      --link-item-border: #adc7e0;
+      --drawer-panel-bg: #f3f9ff;
+      --device-item-bg: #eaf2fc;
+      --device-label-color: #1e4b6e;
+      --device-value-color: #0d3450;
+      --text-color: #173e58;
+      --corner-text-color: #3a6a8e;
+    }
+
+    /* 深色模式变量覆盖 */
+    [data-theme="dark"] {
+      --bg-body: #0a0f14;
+      --panel-bg: #0d1b2a;
+      --panel-border: #1e3a5a;
+      --title-color: #a0c4e8;
+      --badge-bg: #1a3a5c;
+      --badge-color: #b0d0f0;
+      --cat-btn-bg: #1e3a5a;
+      --cat-btn-border: #2a5a8a;
+      --cat-btn-color: #c0d8f0;
+      --cat-btn-hover-bg: #2a5a8a;
+      --jump-row-bg: #122a3e;
+      --jump-row-border: #1e4a6e;
+      --input-border: #2a5a8a;
+      --input-focus-border: #5a9ac0;
+      --go-btn-bg: #2a6a9e;
+      --go-btn-hover-bg: #1a4a7a;
+      --tool-btn-bg: #1e3a5a;
+      --tool-btn-border: #2a5a8a;
+      --tool-btn-color: #c0d8f0;
+      --modal-overlay-bg: rgba(0, 20, 40, 0.5);
+      --modal-card-bg: #0d1b2a;
+      --link-item-bg: #1e3a5a;
+      --link-item-border: #2a5a8a;
+      --drawer-panel-bg: #0d1b2a;
+      --device-item-bg: #122a3e;
+      --device-label-color: #a0c4e8;
+      --device-value-color: #d0e0f0;
+      --text-color: #c0d8f0;
+      --corner-text-color: #7a9ab0;
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -19,7 +85,7 @@
       font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     }
     body {
-      background: #ffffff;
+      background: var(--bg-body);
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -32,7 +98,7 @@
       top: 12px;
       left: 16px;
       font-size: 0.75rem;
-      color: #3a6a8e;
+      color: var(--corner-text-color);
       opacity: 0.7;
       font-weight: 400;
       z-index: 10;
@@ -44,20 +110,41 @@
       bottom: 12px;
       right: 20px;
       font-size: 0.75rem;
-      color: #3a6a8e;
+      color: var(--corner-text-color);
       opacity: 0.7;
       font-weight: 400;
       z-index: 10;
       pointer-events: none;
       text-shadow: 0 1px 2px rgba(255,255,255,0.5);
     }
+    .theme-toggle {
+      position: fixed;
+      bottom: 12px;
+      left: 16px;
+      font-size: 1rem;
+      background: transparent;
+      border: 1px solid var(--panel-border);
+      color: var(--corner-text-color);
+      padding: 4px 10px;
+      border-radius: 20px;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: opacity 0.2s, background 0.2s;
+      z-index: 20;
+      font-weight: 400;
+      backdrop-filter: blur(2px);
+    }
+    .theme-toggle:hover {
+      opacity: 1;
+      background: var(--cat-btn-bg);
+    }
     .main-panel {
       max-width: 1280px;
       width: 100%;
-      background: #f5faff;
+      background: var(--panel-bg);
       border-radius: 24px;
       box-shadow: 0 16px 30px -8px rgba(30, 65, 90, 0.18);
-      border: 1px solid #bdd1e6;
+      border: 1px solid var(--panel-border);
       padding: 16px 20px 20px;
       position: relative;
     }
@@ -72,15 +159,15 @@
     .title-section h1 {
       font-weight: 550;
       font-size: 1.9rem;
-      color: #1e4b6e;
+      color: var(--title-color);
     }
     .badge {
-      color: #2c6182;
-      background: #d0e2f0;
+      color: var(--badge-color);
+      background: var(--badge-bg);
       padding: 5px 14px;
       border-radius: 40px;
       font-size: 0.85rem;
-      border: 1px solid #a7c1d9;
+      border: 1px solid var(--cat-btn-border);
     }
     .category-bar {
       display: flex;
@@ -89,9 +176,9 @@
       margin: 8px 0 14px;
     }
     .cat-btn {
-      background: #d9e8f4;
-      border: 1px solid #adc7e0;
-      color: #1a4059;
+      background: var(--cat-btn-bg);
+      border: 1px solid var(--cat-btn-border);
+      color: var(--cat-btn-color);
       padding: 10px 18px;
       border-radius: 36px;
       font-weight: 500;
@@ -102,16 +189,11 @@
       flex: 0 1 auto;
     }
     .cat-btn:hover {
-      background: #c2d8ed;
+      background: var(--cat-btn-hover-bg);
       border-color: #7fa5c5;
-      color: #0c3147;
+      color: var(--cat-btn-color);
       transform: translateY(-1px);
       box-shadow: 0 6px 10px rgba(46, 82, 110, 0.08);
-    }
-    .cat-btn:active {
-      transform: scale(0.96);
-      background: #b3cde4;
-      box-shadow: 0 2px 5px rgba(46, 82, 110, 0.05);
     }
     .jump-section { margin: 8px 0 10px; }
     .jump-row {
@@ -119,21 +201,21 @@
       flex-wrap: wrap;
       align-items: center;
       gap: 10px;
-      background: #e7f0f9;
+      background: var(--jump-row-bg);
       padding: 8px 14px;
       border-radius: 48px;
       margin-bottom: 10px;
-      border: 1px solid #c1d6ea;
+      border: 1px solid var(--jump-row-border);
     }
     .jump-row input, .jump-row select {
       flex: 4 1 180px;
       padding: 12px 16px;
-      border: 1.5px solid #b3cce2;
+      border: 1.5px solid var(--input-border);
       border-radius: 40px;
-      background: white;
+      background: var(--panel-bg);
       font-size: 0.95rem;
       outline: none;
-      color: #173e58;
+      color: var(--text-color);
       transition: border 0.15s, box-shadow 0.15s;
     }
     .jump-row select {
@@ -141,11 +223,11 @@
       cursor: pointer;
     }
     .jump-row input:focus, .jump-row select:focus {
-      border-color: #4f7fa3;
+      border-color: var(--input-focus-border);
       box-shadow: 0 0 0 3px rgba(79,127,163,0.2);
     }
     .go-btn {
-      background: #4f7f9e;
+      background: var(--go-btn-bg);
       border: none;
       color: white;
       padding: 12px 22px;
@@ -158,14 +240,8 @@
       transition: all 0.15s ease;
     }
     .go-btn:hover {
-      background: #3a6b8c;
+      background: var(--go-btn-hover-bg);
       transform: scale(1.02);
-      box-shadow: 0 8px 14px rgba(39, 77, 105, 0.2);
-    }
-    .go-btn:active {
-      transform: scale(0.97);
-      background: #2d5a7a;
-      box-shadow: 0 3px 8px rgba(39, 77, 105, 0.15);
     }
     .tools-bar {
       display: flex;
@@ -173,9 +249,9 @@
       margin: 10px 0 6px;
     }
     .tool-btn {
-      background: #cddef0;
-      border: 1px solid #a3bed8;
-      color: #1a4765;
+      background: var(--tool-btn-bg);
+      border: 1px solid var(--tool-btn-border);
+      color: var(--tool-btn-color);
       padding: 12px 16px;
       border-radius: 48px;
       font-weight: 550;
@@ -189,24 +265,15 @@
     .tool-btn:hover {
       background: #bcd1e9;
       border-color: #7b9fc2;
-      color: #0d334b;
-      transform: translateY(-1px);
-      box-shadow: 0 6px 10px rgba(46,82,110,0.06);
     }
-    .tool-btn:active {
-      transform: scale(0.97);
-      background: #aec9e2;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-    }
-
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(22, 50, 70, 0.25);
+      background: var(--modal-overlay-bg);
       backdrop-filter: blur(3px);
       visibility: hidden;
       opacity: 0;
-      transition: opacity 0.2s ease, visibility 0.2s;
+      transition: opacity 0.2s, visibility 0.2s;
       z-index: 2000;
       display: flex;
       align-items: center;
@@ -217,16 +284,16 @@
       opacity: 1;
     }
     .modal-card {
-      background: #f3f9ff;
+      background: var(--modal-card-bg);
       width: 90%;
       max-width: 700px;
       max-height: 70vh;
       border-radius: 32px;
-      border: 1px solid #b8d1e8;
+      border: 1px solid var(--panel-border);
       box-shadow: 0 20px 40px rgba(28, 60, 84, 0.25);
       padding: 20px 24px;
       transform: scale(0.95);
-      transition: transform 0.2s ease;
+      transition: transform 0.2s;
       overflow-y: auto;
     }
     .modal-overlay.show .modal-card { transform: scale(1); }
@@ -238,54 +305,45 @@
       border-bottom: 1px solid #c2d7eb;
       padding-bottom: 10px;
     }
-    .modal-header h3 { color: #1c4968; font-size: 1.6rem; font-weight: 550; }
+    .modal-header h3 { color: var(--title-color); font-size: 1.6rem; }
     .modal-close {
       background: none;
       border: none;
       font-size: 30px;
       cursor: pointer;
       color: #33658a;
-      transition: color 0.15s, transform 0.1s;
     }
-    .modal-close:hover { color: #0a3146; transform: scale(1.1); }
-    .modal-close:active { transform: scale(0.95); }
     .link-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
       gap: 10px;
     }
     .link-item {
-      background: #d9e8f4;
-      border: 1px solid #adc7e0;
-      color: #1a4059;
+      background: var(--link-item-bg);
+      border: 1px solid var(--link-item-border);
+      color: var(--cat-btn-color);
       padding: 12px 6px;
       border-radius: 36px;
       text-align: center;
       text-decoration: none;
       font-weight: 500;
       font-size: 0.9rem;
-      transition: all 0.15s ease;
+      transition: all 0.15s;
       display: block;
     }
     .link-item:hover {
-      background: #c2d8ed;
+      background: var(--cat-btn-hover-bg);
       border-color: #7fa5c5;
       transform: translateY(-2px);
-      box-shadow: 0 6px 10px rgba(46, 82, 110, 0.08);
     }
-    .link-item:active {
-      transform: scale(0.96);
-      background: #b0cae3;
-    }
-
     .drawer-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(22,50,70,0.25);
+      background: var(--modal-overlay-bg);
       backdrop-filter: blur(3px);
       visibility: hidden;
       opacity: 0;
-      transition: opacity 0.2s ease, visibility 0.2s;
+      transition: opacity 0.2s, visibility 0.2s;
       z-index: 1000;
       display: flex;
       align-items: flex-end;
@@ -293,10 +351,10 @@
     }
     .drawer-overlay.show { visibility: visible; opacity: 1; }
     .drawer-panel {
-      background: #f3f9ff;
+      background: var(--drawer-panel-bg);
       width: 100%;
       border-radius: 32px 32px 0 0;
-      border: 1px solid #b8d1e8;
+      border: 1px solid var(--panel-border);
       height: 80vh;
       max-height: 80vh;
       overflow: hidden;
@@ -318,58 +376,46 @@
       font-size: 32px;
       cursor: pointer;
       color: #33658a;
-      transition: color 0.15s, transform 0.1s;
     }
-    .drawer-close:hover { color: #0a3146; transform: scale(1.1); }
-    .drawer-close:active { transform: scale(0.95); }
-    .drawer-content { padding: 20px 24px; overflow-y: auto; flex: 1; }
+    .drawer-content { padding: 20px 24px; overflow-y: auto; flex: 1; color: var(--text-color); }
 
     .device-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
     .device-item {
-      background: #eaf2fc;
+      background: var(--device-item-bg);
       border-radius: 20px;
       padding: 16px 18px;
-      border: 1px solid #c5d9ec;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.02);
+      border: 1px solid var(--panel-border);
     }
     .device-label {
       font-weight: 600;
-      color: #1e4b6e;
+      color: var(--device-label-color);
       margin-bottom: 8px;
       font-size: 0.9rem;
       text-transform: uppercase;
-      letter-spacing: 0.3px;
     }
-    .device-value { color: #0d3450; word-break: break-word; font-size: 1rem; line-height: 1.4; }
+    .device-value { color: var(--device-value-color); word-break: break-word; }
     .full-width { grid-column: span 2; }
 
     .ide-container { display: flex; flex-direction: column; gap: 18px; }
-    .ide-editor { background: #ffffff; border-radius: 24px; border: 2px solid #b3cee6; overflow: hidden; }
+    .ide-editor { background: var(--panel-bg); border-radius: 24px; border: 2px solid var(--input-border); }
     .ide-textarea {
       width: 100%; padding: 20px; font-family: 'JetBrains Mono', monospace;
-      font-size: 14px; background: #fafdff; border: none; outline: none;
-      color: #133a51; resize: vertical; min-height: 220px;
+      font-size: 14px; background: var(--panel-bg); border: none; outline: none;
+      color: var(--text-color); resize: vertical; min-height: 220px;
     }
-    .ide-preview { background: white; border-radius: 20px; border: 2px solid #b3cee6; padding: 16px; }
+    .ide-preview { background: white; border-radius: 20px; border: 2px solid var(--input-border); padding: 16px; }
     .ide-preview iframe { width: 100%; height: 260px; border: none; background: white; border-radius: 12px; }
     .run-ide-btn {
-      background: #4f7f9e; color: white; border: none; padding: 14px 28px;
-      border-radius: 48px; font-weight: 600; font-size: 1rem; cursor: pointer;
-      align-self: flex-start; box-shadow: 0 6px 12px rgba(46,84,112,0.12);
-      transition: all 0.15s ease;
+      background: var(--go-btn-bg); color: white; border: none; padding: 14px 28px;
+      border-radius: 48px; font-weight: 600; cursor: pointer;
     }
-    .run-ide-btn:hover { background: #3a6b8c; transform: scale(1.02); }
-    .run-ide-btn:active { transform: scale(0.97); background: #2d5a7a; }
 
     .para-content {
-      background: #eaf2fc; padding: 20px 24px; border-radius: 20px;
-      color: #1a435c; font-size: 1rem; border-left: 5px solid #5982a3; line-height: 1.7;
+      background: var(--device-item-bg); padding: 20px 24px; border-radius: 20px;
+      color: var(--text-color); border-left: 5px solid #5982a3; line-height: 1.7;
     }
 
-    .loading-placeholder {
-      display: flex; align-items: center; justify-content: center;
-      padding: 30px; color: #3a6a8e;
-    }
+    .loading-placeholder { display: flex; align-items: center; justify-content: center; padding: 30px; }
     .loading-spinner {
       width: 24px; height: 24px; border: 3px solid #c5d9ec;
       border-top-color: #4f7f9e; border-radius: 50%;
@@ -390,6 +436,7 @@
 <body>
   <div class="corner-tl">不自由毋宁死 · 不自由毋寧死 · Give me liberty or give me death · 自由か、死か</div>
   <div class="corner-br">made by ZZC-jeizuchin, Github</div>
+  <button class="theme-toggle" id="themeToggle" aria-label="切换深色模式">🌙 深色</button>
 
 <div class="main-panel">
   <div class="title-section">
@@ -411,7 +458,7 @@
       <button class="go-btn" id="jumpBtn">前往</button>
     </div>
     <div class="jump-row">
-      <input type="text" id="baiduImageInput" placeholder="百度图片搜索关键词">
+      <input type="text" id="baiduImageInput" placeholder="百度图片搜索关键词" autocomplete="off">
       <button class="go-btn" id="baiduImageBtn">搜图</button>
     </div>
     <div class="jump-row">
@@ -422,7 +469,7 @@
         <option value="bing">Bing</option>
         <option value="duckduckgo">DuckDuckGo</option>
       </select>
-      <input type="text" id="searchKeywordInput" placeholder="输入搜索关键词">
+      <input type="text" id="searchKeywordInput" placeholder="输入搜索关键词" autocomplete="off">
       <button class="go-btn" id="searchEngineBtn">搜索</button>
     </div>
   </div>
@@ -457,6 +504,20 @@
 <script>
   (function(){
     "use strict";
+
+    // ---------- 深色模式切换 ----------
+    const themeToggle = document.getElementById('themeToggle');
+    const currentTheme = localStorage.getItem('swc_theme') || 'light';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    themeToggle.textContent = currentTheme === 'light' ? '🌙 深色' : '☀️ 亮色';
+    themeToggle.addEventListener('click', () => {
+      const newTheme = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('swc_theme', newTheme);
+      themeToggle.textContent = newTheme === 'light' ? '🌙 深色' : '☀️ 亮色';
+    });
+
+    // ---------- 链接库 ----------
     const linkDB = {
       ai: [
         { name: 'DeepSeek', url: 'https://chat.deepseek.com' },
@@ -507,10 +568,12 @@
     };
     const catNames = { ai:'AI工具', search:'搜索引擎', media:'通信音乐', dev:'开发', other:'其他' };
 
+    // ---------- 模态框 (懒加载: 点击分类才构建) ----------
     const modalOverlay = document.getElementById('modalOverlay');
     const modalTitle = document.getElementById('modalTitle');
     const modalGrid = document.getElementById('modalLinkGrid');
     const modalClose = document.getElementById('modalCloseBtn');
+    
     document.querySelectorAll('[data-cat]').forEach(btn => {
       btn.addEventListener('click', () => {
         const cat = btn.dataset.cat;
@@ -525,33 +588,69 @@
     modalOverlay.addEventListener('click', e=> { if(e.target===modalOverlay) modalOverlay.classList.remove('show'); });
     document.addEventListener('keydown', e=> { if(e.key==='Escape' && modalOverlay.classList.contains('show')) modalOverlay.classList.remove('show'); });
 
+    // ---------- 通用跳转 ----------
     function performJump(url, addTimestamp = true) {
       if (!url) return;
       let final = url;
       if (!/^https?:\/\//i.test(final)) final = 'https://' + final;
-      if (addTimestamp) {
-        const ts = Date.now();
-        final += (final.includes('?') ? '&' : '?') + '_t=' + ts;
-      }
+      if (addTimestamp) final += (final.includes('?') ? '&' : '?') + '_t=' + Date.now();
       const newWin = window.open(final, '_blank', 'noopener,noreferrer');
       if (!newWin) window.location.href = final;
     }
 
+    // ---------- 历史记录管理 (前4条) ----------
+    function getHistory(key) {
+      try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch { return []; }
+    }
+    function addHistory(key, value) {
+      if (!value.trim()) return;
+      let hist = getHistory(key);
+      hist = hist.filter(v => v !== value);
+      hist.unshift(value);
+      if (hist.length > 4) hist.pop();
+      localStorage.setItem(key, JSON.stringify(hist));
+    }
+    function setupHistoryInput(inputEl, storageKey) {
+      const datalistId = `dl_${storageKey}`;
+      let dl = document.getElementById(datalistId);
+      if (!dl) {
+        dl = document.createElement('datalist');
+        dl.id = datalistId;
+        inputEl.setAttribute('list', datalistId);
+        inputEl.parentNode?.appendChild(dl);
+      }
+      function refreshDatalist() {
+        const hist = getHistory(storageKey);
+        dl.innerHTML = hist.map(v => `<option value="${v}">`).join('');
+      }
+      inputEl.addEventListener('focus', refreshDatalist);
+      return { add: (v) => { addHistory(storageKey, v); } };
+    }
+
+    const imgInput = document.getElementById('baiduImageInput');
+    const engineInput = document.getElementById('searchKeywordInput');
+    const imgHistory = setupHistoryInput(imgInput, 'baidu_img_hist');
+    const engineHistory = setupHistoryInput(engineInput, 'engine_hist');
+
+    // 自定义跳转
     const inputUrl = document.getElementById('customUrlInput');
     const jumpBtn = document.getElementById('jumpBtn');
     jumpBtn.addEventListener('click', ()=> { const raw = inputUrl.value.trim(); if(raw) performJump(raw, false); });
-    inputUrl.addEventListener('keydown', e=> { if(e.key==='Enter'){ e.preventDefault(); const raw=inputUrl.value.trim(); if(raw) performJump(raw, false); }});
+    inputUrl.addEventListener('keydown', e=> { if(e.key==='Enter'){ e.preventDefault(); jumpBtn.click(); }});
 
-    const baiduInput = document.getElementById('baiduImageInput');
+    // 百度图片搜索
     const baiduBtn = document.getElementById('baiduImageBtn');
     baiduBtn.addEventListener('click', ()=> { 
-      const kw = baiduInput.value.trim(); 
-      if(kw) performJump('https://image.baidu.com/search/index?tn=baiduimage&ie=utf-8&word='+encodeURIComponent(kw), false); 
+      const kw = imgInput.value.trim(); 
+      if(kw) {
+        imgHistory.add(kw);
+        performJump('https://image.baidu.com/search/index?tn=baiduimage&ie=utf-8&word='+encodeURIComponent(kw), false);
+      }
     });
-    baiduInput.addEventListener('keydown', e=> { if(e.key==='Enter'){ e.preventDefault(); baiduBtn.click(); }});
+    imgInput.addEventListener('keydown', e=> { if(e.key==='Enter'){ e.preventDefault(); baiduBtn.click(); }});
 
+    // 搜索引擎切换
     const engineSelect = document.getElementById('searchEngineSelect');
-    const keywordInput = document.getElementById('searchKeywordInput');
     const searchBtn = document.getElementById('searchEngineBtn');
     function getEngineSearchUrl(engine, query) {
       const encoded = encodeURIComponent(query);
@@ -566,14 +665,15 @@
     }
     function performEngineSearch() {
       const engine = engineSelect.value;
-      const query = keywordInput.value.trim();
+      const query = engineInput.value.trim();
       if (!query) return;
-      const url = getEngineSearchUrl(engine, query);
-      performJump(url, true);
+      engineHistory.add(query);
+      performJump(getEngineSearchUrl(engine, query), true);
     }
     searchBtn.addEventListener('click', performEngineSearch);
-    keywordInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); performEngineSearch(); } });
+    engineInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); performEngineSearch(); } });
 
+    // ---------- 底部抽屉 ----------
     const overlay = document.getElementById('drawerOverlay');
     const drawerTitle = document.getElementById('drawerTitle');
     const drawerContent = document.getElementById('drawerContent');
@@ -583,6 +683,53 @@
     closeBtn.addEventListener('click', closeDrawer);
     overlay.addEventListener('click', e=> { if(e.target===overlay) closeDrawer(); });
     document.addEventListener('keydown', e=> { if(e.key==='Escape' && overlay.classList.contains('show')) closeDrawer(); });
+
+    // 增强的设备信息获取
+    async function getRealPlatform() {
+      if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+        try {
+          const uaData = await navigator.userAgentData.getHighEntropyValues(['platform', 'architecture', 'bitness']);
+          return `${uaData.platform} (${uaData.architecture}, ${uaData.bitness}-bit)`;
+        } catch {}
+      }
+      const ua = navigator.userAgent;
+      if (ua.includes('Win64') || ua.includes('WOW64')) return 'Windows (x64, 64-bit)';
+      if (ua.includes('Win32')) return 'Windows (x86, 32-bit)';
+      if (ua.includes('Mac OS X')) return 'macOS';
+      if (ua.includes('Linux')) return 'Linux';
+      return navigator.platform;
+    }
+
+    async function getBatteryInfo() {
+      if (!navigator.getBattery) return '不支持';
+      const b = await navigator.getBattery();
+      return `${Math.round(b.level*100)}% ${b.charging ? '⚡' : '🔋'}  ${b.charging ? `充满约${b.chargingTime===Infinity?'N/A':Math.round(b.chargingTime/60)+'分'}` : `剩余${b.dischargingTime===Infinity?'N/A':Math.round(b.dischargingTime/60)+'分'}`}`;
+    }
+
+    function getNetworkType() {
+      const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      return conn ? conn.effectiveType || '未知' : '未知';
+    }
+
+    function getGPUInfo() {
+      try {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        if (!gl) return 'WebGL不支持';
+        const ext = gl.getExtension('WEBGL_debug_renderer_info');
+        if (!ext) return '扩展不可用';
+        return gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) || '未知';
+      } catch { return '获取失败'; }
+    }
+
+    async function getMediaDevices() {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const cams = devices.filter(d => d.kind === 'videoinput').map(d => d.label || '未命名摄像头');
+        const mics = devices.filter(d => d.kind === 'audioinput').map(d => d.label || '未命名麦克风');
+        return `摄像头: ${cams.length ? cams.join(', ') : '无'}<br>麦克风: ${mics.length ? mics.join(', ') : '无'}`;
+      } catch { return '需要摄像头/麦克风权限'; }
+    }
 
     async function renderDevice() {
       drawerContent.innerHTML = `<div class="loading-placeholder"><div class="loading-spinner"></div>正在获取设备信息...</div>`;
@@ -595,36 +742,42 @@
       }catch{ local='WebRTC不可用'; }
       try{ const r=await fetch('https://api.ipify.org?format=json'); const d=await r.json(); pub=d.ip; }catch{ pub='获取失败'; }
 
+      const platform = await getRealPlatform();
+      const battery = await getBatteryInfo();
+      const network = getNetworkType();
+      const gpu = getGPUInfo();
+      const media = await getMediaDevices();
+      
       const logicalWidth = window.screen.width;
       const logicalHeight = window.screen.height;
       const dpr = window.devicePixelRatio || 1;
       const physicalWidth = Math.round(logicalWidth * dpr);
       const physicalHeight = Math.round(logicalHeight * dpr);
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-      const screenInfo = `逻辑: ${logicalWidth}x${logicalHeight} (CSS px) | 物理: ${physicalWidth}x${physicalHeight} (px) | DPR: ${dpr} | 视口: ${viewportWidth}x${viewportHeight}`;
+      const screenInfo = `逻辑: ${logicalWidth}x${logicalHeight} (CSS px) | 物理: ${physicalWidth}x${physicalHeight} | DPR: ${dpr}`;
       
       const language = navigator.language || '未知';
-      const platform = navigator.platform || '未知';
-      const cookies = navigator.cookieEnabled ? '已启用' : '已禁用';
+      const cookies = navigator.cookieEnabled ? '启用' : '禁用';
       const online = navigator.onLine ? '在线' : '离线';
-      
-      let memoryInfo = ('deviceMemory' in navigator) ? `${navigator.deviceMemory} GB` : '不支持 (Safari隐私限制)';
+      let memoryInfo = ('deviceMemory' in navigator) ? `${navigator.deviceMemory} GB` : '不支持';
       const cores = navigator.hardwareConcurrency || '未知';
       const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-      const coresInfo = isIOS ? `${cores} (iOS限制，实际为6核)` : cores;
+      const coresInfo = isIOS ? `${cores} (iOS限制)` : cores;
       const ua = navigator.userAgent;
 
       drawerContent.innerHTML = `
         <div class="device-grid">
-          <div class="device-item"><div class="device-label">User Agent</div><div class="device-value" style="font-size:0.85rem;">${ua}</div></div>
+          <div class="device-item"><div class="device-label">系统/架构</div><div class="device-value">${platform}</div></div>
           <div class="device-item"><div class="device-label">公网 IP</div><div class="device-value">${pub}</div></div>
           <div class="device-item"><div class="device-label">本地 IP</div><div class="device-value">${local}</div></div>
-          <div class="device-item"><div class="device-label">屏幕信息</div><div class="device-value" style="font-size:0.85rem;">${screenInfo}</div></div>
-          <div class="device-item"><div class="device-label">语言 / 平台</div><div class="device-value">${language} / ${platform}</div></div>
-          <div class="device-item"><div class="device-label">网络状态</div><div class="device-value">${online} · Cookie ${cookies}</div></div>
-          <div class="device-item"><div class="device-label">硬件线程 / 内存</div><div class="device-value">${coresInfo} 核心 · ${memoryInfo}</div></div>
-          <div class="device-item full-width"><div class="device-label">MAC 地址</div><div class="device-value">浏览器隐私限制无法获取真实MAC地址</div></div>
+          <div class="device-item"><div class="device-label">屏幕信息</div><div class="device-value" style="font-size:0.8rem;">${screenInfo}</div></div>
+          <div class="device-item"><div class="device-label">电池</div><div class="device-value">${battery}</div></div>
+          <div class="device-item"><div class="device-label">网络类型</div><div class="device-value">${network}</div></div>
+          <div class="device-item"><div class="device-label">GPU</div><div class="device-value" style="font-size:0.8rem;">${gpu}</div></div>
+          <div class="device-item full-width"><div class="device-label">媒体设备</div><div class="device-value" style="font-size:0.8rem;">${media}</div></div>
+          <div class="device-item"><div class="device-label">语言</div><div class="device-value">${language}</div></div>
+          <div class="device-item"><div class="device-label">在线/Cookie</div><div class="device-value">${online} · ${cookies}</div></div>
+          <div class="device-item"><div class="device-label">CPU核心/内存</div><div class="device-value">${coresInfo} 核心 · ${memoryInfo}</div></div>
+          <div class="device-item full-width"><div class="device-label">User Agent</div><div class="device-value" style="font-size:0.7rem;">${ua}</div></div>
         </div>
         <button class="tool-btn" id="refreshDevice" style="margin-top:20px;">刷新信息</button>
       `;
@@ -636,21 +789,33 @@
       renderDevice();
     });
 
+    // HTML IDE (带上次编辑记忆)
     document.getElementById('showIdeBtn').addEventListener('click', ()=>{
+      const savedCode = localStorage.getItem('ide_last_code') || `<h1>预览</h1><p>在左侧编辑，点击运行。</p>`;
       openDrawer('HTML IDE', `
         <div class="ide-container">
           <div class="ide-editor">
-            <textarea id="ideInput" class="ide-textarea" placeholder="<h1>Hello SwC!</h1>"><h1>预览</h1><p>在左侧编辑，点击运行。</p></textarea>
+            <textarea id="ideInput" class="ide-textarea" placeholder="<h1>Hello SwC!</h1>">${savedCode.replace(/`/g,'\\`')}</textarea>
           </div>
           <button class="run-ide-btn" id="runIde">运行代码</button>
           <div class="ide-preview"><iframe id="previewFrame" sandbox="allow-scripts allow-same-origin"></iframe></div>
         </div>
       `);
-      const ta=document.getElementById('ideInput'), btn=document.getElementById('runIde'), fr=document.getElementById('previewFrame');
-      function update(){ const doc=fr.contentDocument||fr.contentWindow.document; doc.open(); doc.write(ta.value); doc.close(); }
-      btn.addEventListener('click', update); update();
+      const ta = document.getElementById('ideInput');
+      const btn = document.getElementById('runIde');
+      const fr = document.getElementById('previewFrame');
+      function updatePreview() {
+        const doc = fr.contentDocument || fr.contentWindow.document;
+        doc.open();
+        doc.write(ta.value);
+        doc.close();
+      }
+      btn.addEventListener('click', updatePreview);
+      ta.addEventListener('input', () => localStorage.setItem('ide_last_code', ta.value));
+      updatePreview();
     });
 
+    // 使用指南 (完整原文)
     document.getElementById('showParaBtn').addEventListener('click', ()=>{
       openDrawer('使用指南', `
         <div class="para-content">
