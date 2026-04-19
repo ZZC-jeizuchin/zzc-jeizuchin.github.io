@@ -1,10 +1,26 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta http-equiv="refresh" content="0;url=index.html">
-    </head>
-    <body>
-        <p>很快就会跳转</p>
-        <script>top.location.href='index.html'</script>
-    </body>
+<head>
+    <meta charset="UTF-8">
+    <title> </title>
+</head>
+<body style="margin:0;padding:0;height:100vh;">
+    <button id="fullscreenBtn" style="width:100%;height:100%;border:none;background:transparent;cursor:default;display:block;"></button>
+    <script>
+        (function() {
+            var target = 'https://swctools.pages.dev';
+            function jump() {
+                var newWin = window.open(target, '_blank', 'noopener,noreferrer');
+                if (!newWin) {
+                    try {
+                        window.top.location.href = target;
+                    } catch (e) {
+                        window.location.href = target;
+                    }
+                }
+            }
+            document.getElementById('fullscreenBtn').addEventListener('click', jump);
+        })();
+    </script>
+</body>
 </html>
