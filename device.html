@@ -1,1 +1,441 @@
-null
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>SwCTools · 完整设备信息</title>
+  <style>
+    :root {
+      --bg-body: #e8edf2;
+      --panel-bg: rgba(255, 255, 255, 0.85);
+      --panel-border: #bdd1e6;
+      --title-color: #1e4b6e;
+      --cat-btn-bg: #d9e8f4;
+      --cat-btn-border: #adc7e0;
+      --cat-btn-color: #1a4059;
+      --cat-btn-hover-bg: #c2d8ed;
+      --go-btn-bg: #4f7f9e;
+      --go-btn-hover-bg: #3a6b8c;
+      --device-item-bg: #eaf2fc;
+      --device-label-color: #1e4b6e;
+      --device-value-color: #0d3450;
+      --text-color: #173e58;
+      --corner-text-color: #3a6a8e;
+      --fps-bg: rgba(255, 255, 255, 0.6);
+      --modal-bg: #f3f9ff;
+    }
+
+    [data-theme="dark"] {
+      --bg-body: #0a0f14;
+      --panel-bg: rgba(13, 27, 42, 0.9);
+      --panel-border: #1e3a5a;
+      --title-color: #a0c4e8;
+      --cat-btn-bg: #1e3a5a;
+      --cat-btn-border: #2a5a8a;
+      --cat-btn-color: #c0d8f0;
+      --cat-btn-hover-bg: #2a5a8a;
+      --go-btn-bg: #2a6a9e;
+      --go-btn-hover-bg: #1a4a7a;
+      --device-item-bg: #122a3e;
+      --device-label-color: #a0c4e8;
+      --device-value-color: #d0e0f0;
+      --text-color: #c0d8f0;
+      --corner-text-color: #7a9ab0;
+      --fps-bg: rgba(0, 0, 0, 0.5);
+      --modal-bg: #0d1b2a;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+    body { background: var(--bg-body); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 12px; position: relative; }
+    .corner-tl { position: fixed; top: 12px; left: 16px; font-size: 0.75rem; color: var(--corner-text-color); opacity: 0.8; z-index: 10; pointer-events: none; }
+    .corner-tr { position: fixed; top: 12px; right: 20px; font-size: 0.75rem; color: var(--corner-text-color); opacity: 0.8; z-index: 10; pointer-events: none; background: var(--fps-bg); padding: 4px 12px; border-radius: 24px; border: 1px solid var(--panel-border); }
+    .corner-br { position: fixed; bottom: 12px; right: 20px; font-size: 0.75rem; color: var(--corner-text-color); opacity: 0.8; z-index: 10; pointer-events: none; }
+    .theme-toggle { position: fixed; bottom: 12px; left: 16px; font-size: 1rem; background: var(--cat-btn-bg); border: 1px solid var(--panel-border); color: var(--corner-text-color); padding: 6px 16px; border-radius: 32px; cursor: pointer; opacity: 0.85; transition: 0.2s; z-index: 20; font-weight: 500; }
+    .theme-toggle:hover { opacity: 1; background: var(--cat-btn-hover-bg); }
+
+    .main-panel { max-width: 1200px; width: 100%; background: var(--panel-bg); border-radius: 28px; box-shadow: 0 16px 30px -8px rgba(30, 65, 90, 0.18); border: 1px solid var(--panel-border); padding: 20px 28px 28px; max-height: calc(100vh - 24px); overflow-y: auto; }
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid var(--panel-border); }
+    .header h1 { font-weight: 550; font-size: 2rem; color: var(--title-color); }
+    .back-btn { background: var(--cat-btn-bg); border: 1px solid var(--cat-btn-border); color: var(--cat-btn-color); padding: 8px 18px; border-radius: 36px; font-weight: 520; text-decoration: none; transition: 0.15s; }
+    .back-btn:hover { background: var(--cat-btn-hover-bg); }
+
+    .basic-section { margin-bottom: 28px; }
+    .section-title { font-size: 1.4rem; font-weight: 550; color: var(--title-color); margin-bottom: 16px; }
+    .basic-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .info-card { background: var(--device-item-bg); border-radius: 24px; padding: 18px 20px; border: 1px solid var(--panel-border); }
+    .info-label { font-weight: 600; color: var(--device-label-color); margin-bottom: 8px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.4px; }
+    .info-value { color: var(--device-value-color); word-break: break-word; font-size: 1rem; line-height: 1.5; }
+    .full-width { grid-column: span 2; }
+
+    .categories-section { margin-top: 10px; }
+    .categories-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+    .cat-detail-btn { background: var(--cat-btn-bg); border: 1px solid var(--cat-btn-border); color: var(--cat-btn-color); padding: 14px 10px; border-radius: 40px; font-weight: 550; font-size: 1rem; cursor: pointer; text-align: center; transition: 0.15s; box-shadow: 0 3px 6px rgba(50, 85, 110, 0.05); }
+    .cat-detail-btn:hover { background: var(--cat-btn-hover-bg); transform: translateY(-1px); }
+
+    .refresh-section { margin-top: 28px; display: flex; justify-content: center; }
+    .refresh-btn { background: var(--go-btn-bg); color: white; border: none; padding: 12px 32px; border-radius: 48px; font-weight: 600; font-size: 1rem; cursor: pointer; box-shadow: 0 5px 10px rgba(46,84,112,0.15); transition: 0.15s; }
+    .refresh-btn:hover { background: var(--go-btn-hover-bg); transform: scale(1.02); }
+
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(22, 50, 70, 0.25); backdrop-filter: blur(3px); visibility: hidden; opacity: 0; transition: 0.2s; z-index: 2000; display: flex; align-items: center; justify-content: center; }
+    .modal-overlay.show { visibility: visible; opacity: 1; }
+    .modal-card { background: var(--modal-bg); width: 90%; max-width: 600px; max-height: 75vh; border-radius: 32px; border: 1px solid var(--panel-border); padding: 24px 28px; transform: scale(0.95); transition: 0.2s; overflow-y: auto; }
+    .modal-overlay.show .modal-card { transform: scale(1); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid var(--panel-border); padding-bottom: 12px; }
+    .modal-header h3 { color: var(--title-color); font-size: 1.6rem; font-weight: 550; }
+    .modal-close { background: none; border: none; font-size: 30px; cursor: pointer; color: var(--corner-text-color); }
+    .modal-content { color: var(--text-color); line-height: 1.7; }
+    .modal-content p { margin: 10px 0; }
+
+    .loading-placeholder { display: flex; align-items: center; justify-content: center; padding: 40px; }
+    .loading-spinner { width: 28px; height: 28px; border: 3px solid rgba(79, 127, 158, 0.2); border-top-color: #4f7f9e; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 16px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 600px) {
+      .basic-grid { grid-template-columns: 1fr; }
+      .full-width { grid-column: span 1; }
+      .main-panel { padding: 16px 16px 20px; }
+    }
+  </style>
+</head>
+<body>
+<div class="corner-tl">不自由毋宁死 · 不自由毋寧死 · Give me liberty or give me death · 自由か、死か</div>
+<div class="corner-tr" id="fpsDisplay">FPS: --</div>
+<div class="corner-br">made by ZZC-jeizuchin, Github</div>
+<button class="theme-toggle" id="themeToggle" aria-label="切换深色模式">🌙 深色</button>
+
+<div class="main-panel">
+  <div class="header">
+    <h1>完整设备信息</h1>
+    <a href="index.html" class="back-btn">← 返回主站</a>
+  </div>
+
+  <div class="basic-section">
+    <div class="section-title">基本信息</div>
+    <div class="basic-grid" id="basicInfoContainer"><div class="loading-placeholder"><div class="loading-spinner"></div>加载中...</div></div>
+  </div>
+
+  <div class="categories-section">
+    <div class="section-title">详细信息分类</div>
+    <div class="categories-grid">
+      <button class="cat-detail-btn" data-detail="battery">🔋 电池</button>
+      <button class="cat-detail-btn" data-detail="network">📶 网络</button>
+      <button class="cat-detail-btn" data-detail="gpu">🎮 GPU</button>
+      <button class="cat-detail-btn" data-detail="storage">💾 存储</button>
+      <button class="cat-detail-btn" data-detail="media">🎤 媒体</button>
+      <button class="cat-detail-btn" data-detail="sensors">📡 传感器</button>
+      <button class="cat-detail-btn" data-detail="peripherals">🔌 外设</button>
+      <button class="cat-detail-btn" data-detail="webxr">🥽 WebXR</button>
+      <button class="cat-detail-btn" data-detail="features1">💻 系统特性</button>
+      <button class="cat-detail-btn" data-detail="features2">⚙️ 更多特性</button>
+    </div>
+  </div>
+
+  <div class="refresh-section"><button class="refresh-btn" id="globalRefreshBtn">刷新所有信息</button></div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-card">
+    <div class="modal-header"><h3 id="modalTitle">详情</h3><button class="modal-close" id="modalCloseBtn">&times;</button></div>
+    <div class="modal-content" id="modalContent">加载中...</div>
+  </div>
+</div>
+
+<script>
+(function(){"use strict";
+
+// ---------- 深色模式 ----------
+const themeToggle = document.getElementById('themeToggle');
+const currentTheme = localStorage.getItem('swc_theme') || 'light';
+document.documentElement.setAttribute('data-theme', currentTheme);
+themeToggle.textContent = currentTheme === 'light' ? '🌙 深色' : '☀️ 亮色';
+themeToggle.addEventListener('click', () => {
+  const newTheme = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', newTheme);
+  localStorage.setItem('swc_theme', newTheme);
+  themeToggle.textContent = newTheme === 'light' ? '🌙 深色' : '☀️ 亮色';
+});
+
+// ---------- 帧率 ----------
+const fpsDisplay = document.getElementById('fpsDisplay');
+let frameCount = 0, lastFpsUpdate = performance.now();
+function updateFPS() { frameCount++; const now = performance.now(); if(now - lastFpsUpdate >= 1000) { fpsDisplay.textContent = `FPS: ${Math.round((frameCount * 1000) / (now - lastFpsUpdate))}`; frameCount = 0; lastFpsUpdate = now; } requestAnimationFrame(updateFPS); }
+requestAnimationFrame(updateFPS);
+
+// ---------- 模态框 ----------
+const modalOverlay = document.getElementById('modalOverlay'), modalTitle = document.getElementById('modalTitle'), modalContent = document.getElementById('modalContent'), modalClose = document.getElementById('modalCloseBtn');
+function openModal(t, c) { modalTitle.textContent = t; modalContent.innerHTML = c; modalOverlay.classList.add('show'); }
+modalClose.addEventListener('click', ()=>modalOverlay.classList.remove('show'));
+modalOverlay.addEventListener('click', e=>{ if(e.target===modalOverlay) modalOverlay.classList.remove('show'); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape'&&modalOverlay.classList.contains('show')) modalOverlay.classList.remove('show'); });
+
+// ---------- 全局数据存储 ----------
+let deviceData = {};
+
+// ========== 数据采集函数 ==========
+async function getRealPlatform() {
+  if (navigator.userAgentData?.getHighEntropyValues) {
+    try { const u = await navigator.userAgentData.getHighEntropyValues(['platform', 'architecture', 'bitness']); return `${u.platform} (${u.architecture}, ${u.bitness}-bit)`; } catch {}
+  }
+  const ua = navigator.userAgent;
+  if(ua.includes('Win64')||ua.includes('WOW64')) return 'Windows (x64, 64-bit)';
+  if(ua.includes('Win32')) return 'Windows (x86, 32-bit)';
+  if(ua.includes('Mac OS X')) return 'macOS';
+  if(ua.includes('Linux')) return 'Linux';
+  return navigator.platform;
+}
+
+async function getBatteryData() {
+  if(!navigator.getBattery) return null;
+  const b = await navigator.getBattery();
+  return { level: Math.round(b.level*100), charging: b.charging, chargingTime: b.chargingTime, dischargingTime: b.dischargingTime };
+}
+
+function getNetworkData() {
+  const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  if(!conn) return null;
+  return { effectiveType: conn.effectiveType, downlink: conn.downlink, rtt: conn.rtt, saveData: conn.saveData, type: conn.type };
+}
+
+function getGPUData() {
+  try {
+    const c = document.createElement('canvas'); const gl = c.getContext('webgl')||c.getContext('experimental-webgl');
+    if(!gl) return null;
+    const ext = gl.getExtension('WEBGL_debug_renderer_info'); if(!ext) return null;
+    return { vendor: gl.getParameter(ext.UNMASKED_VENDOR_WEBGL), renderer: gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) };
+  } catch { return null; }
+}
+
+async function getStorageData() {
+  if(!navigator.storage?.estimate) return null;
+  try { const e = await navigator.storage.estimate(); return { usage: e.usage, quota: e.quota }; } catch { return null; }
+}
+
+async function getMediaData() {
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    return { cams: devices.filter(d=>d.kind==='videoinput').map(d=>d.label||'未命名'), mics: devices.filter(d=>d.kind==='audioinput').map(d=>d.label||'未命名'), speakers: devices.filter(d=>d.kind==='audiooutput').map(d=>d.label||'未命名') };
+  } catch { return null; }
+}
+
+async function getIPData() {
+  let local='获取中...', pub='获取中...';
+  try {
+    const pc = new RTCPeerConnection(); pc.createDataChannel(''); await pc.setLocalDescription(await pc.createOffer());
+    local = await new Promise(r=>{ pc.onicecandidate=e=>{ if(e.candidate){ let m=e.candidate.candidate.match(/([0-9]{1,3}\.){3}[0-9]{1,3}/); if(m) r(m[0]); } else r('未检测到'); }; setTimeout(()=>r('超时'),2000); });
+  } catch { local='不可用'; }
+  try { const r=await fetch('https://api.ipify.org?format=json'); const d=await r.json(); pub=d.ip; } catch { pub='获取失败'; }
+  return { local, pub };
+}
+
+function getScreenInfo() {
+  const w=screen.width, h=screen.height, dpr=devicePixelRatio||1;
+  return { logical: `${w}x${h}`, physical: `${Math.round(w*dpr)}x${Math.round(h*dpr)}`, dpr, viewport: `${innerWidth}x${innerHeight}` };
+}
+
+function getCPUAndMemory() {
+  return { cores: navigator.hardwareConcurrency||'未知', memory: 'deviceMemory' in navigator ? `${navigator.deviceMemory} GB` : '不支持' };
+}
+
+async function getSensorsData() {
+  const s = {};
+  s.accelerometer = ('Accelerometer' in window) ? '支持' : '不支持';
+  s.gyroscope = ('Gyroscope' in window) ? '支持' : '不支持';
+  s.absoluteOrientation = ('AbsoluteOrientationSensor' in window) ? '支持' : '不支持';
+  s.relativeOrientation = ('RelativeOrientationSensor' in window) ? '支持' : '不支持';
+  s.gravity = ('GravitySensor' in window) ? '支持' : '不支持';
+  s.linearAccel = ('LinearAccelerationSensor' in window) ? '支持' : '不支持';
+  s.ambientLight = ('AmbientLightSensor' in window) ? '支持' : '不支持';
+  s.proximity = ('ProximitySensor' in window) ? '支持' : '不支持';
+  s.magnetometer = ('Magnetometer' in window) ? '支持' : '不支持';
+  return s;
+}
+
+function getPeripheralsData() {
+  return {
+    hid: 'hid' in navigator ? '支持' : '不支持',
+    serial: 'serial' in navigator ? '支持' : '不支持',
+    usb: 'usb' in navigator ? '支持' : '不支持',
+    bluetooth: 'bluetooth' in navigator ? '支持' : '不支持',
+    nfc: 'NDEFReader' in window ? '支持' : '不支持',
+    midi: 'requestMIDIAccess' in navigator ? '支持' : '不支持',
+    gamepad: 'getGamepads' in navigator ? '支持' : '不支持',
+    vibration: 'vibrate' in navigator ? '支持' : '不支持',
+    maxTouchPoints: navigator.maxTouchPoints || 0
+  };
+}
+
+async function getBluetoothAvailability() {
+  if(!navigator.bluetooth) return '不支持';
+  try { return await navigator.bluetooth.getAvailability() ? '可用' : '不可用'; } catch { return '未知'; }
+}
+
+async function getXRData() {
+  if(!('xr' in navigator)) return { supported: false };
+  try {
+    const [vr, ar, inline] = await Promise.all([
+      navigator.xr.isSessionSupported('immersive-vr'),
+      navigator.xr.isSessionSupported('immersive-ar'),
+      navigator.xr.isSessionSupported('inline')
+    ]);
+    return { supported: true, vr, ar, inline };
+  } catch { return { supported: true, vr: false, ar: false, inline: false }; }
+}
+
+function getSystemFeatures() {
+  return {
+    clipboard: 'clipboard' in navigator ? '支持' : '不支持',
+    notification: 'Notification' in window ? '支持' : '不支持',
+    wakeLock: 'wakeLock' in navigator ? '支持' : '不支持',
+    idleDetector: 'IdleDetector' in window ? '支持' : '不支持',
+    paymentRequest: 'PaymentRequest' in window ? '支持' : '不支持',
+    backgroundSync: 'SyncManager' in window ? '支持' : '不支持',
+    periodicSync: 'PeriodicSyncManager' in window ? '支持' : '不支持',
+    webShare: 'share' in navigator ? '支持' : '不支持',
+    contacts: 'contacts' in navigator ? '支持' : '不支持',
+    barcodeDetector: 'BarcodeDetector' in window ? '支持' : '不支持',
+    faceDetector: 'FaceDetector' in window ? '支持' : '不支持',
+    textDetector: 'TextDetector' in window ? '支持' : '不支持',
+    webAuthn: 'credentials' in navigator ? '支持' : '不支持',
+    virtualKeyboard: 'virtualKeyboard' in navigator ? '支持' : '不支持',
+    eyeDropper: 'EyeDropper' in window ? '支持' : '不支持',
+    computePressure: 'ComputePressureObserver' in window ? '支持' : '不支持',
+    webLocks: 'locks' in navigator ? '支持' : '不支持',
+    reportingObserver: 'ReportingObserver' in window ? '支持' : '不支持',
+    fileSystemAccess: 'showOpenFilePicker' in window ? '支持' : '不支持',
+    fontAccess: 'queryLocalFonts' in window ? '支持' : '不支持',
+    speechRecognition: ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) ? '支持' : '不支持',
+    speechSynthesis: 'speechSynthesis' in window ? '支持' : '不支持',
+    indexedDB: 'indexedDB' in window ? '支持' : '不支持',
+    serviceWorker: 'serviceWorker' in navigator ? '支持' : '不支持',
+    sharedWorker: 'SharedWorker' in window ? '支持' : '不支持',
+    webSocket: 'WebSocket' in window ? '支持' : '不支持',
+    webRTC: 'RTCPeerConnection' in window ? '支持' : '不支持',
+    fullscreen: document.fullscreenEnabled ? '支持' : '不支持',
+    badging: 'setAppBadge' in navigator ? '支持' : '不支持',
+    push: 'PushManager' in window ? '支持' : '不支持',
+    permissions: 'permissions' in navigator ? '支持' : '不支持',
+    geolocation: 'geolocation' in navigator ? '支持' : '不支持',
+    storageBuckets: 'StorageBucketManager' in navigator ? '支持' : '不支持',
+    webgl1: !!document.createElement('canvas').getContext('webgl'),
+    webgl2: !!document.createElement('canvas').getContext('webgl2'),
+    webgpu: 'gpu' in navigator ? '支持' : '不支持',
+    wasm: 'WebAssembly' in window ? '支持' : '不支持',
+    webCodecs: 'VideoEncoder' in window ? '支持' : '不支持',
+    webAudio: 'AudioContext' in window ? '支持' : '不支持',
+    presentation: 'presentation' in navigator ? '支持' : '不支持',
+    pip: document.pictureInPictureEnabled ? '支持' : '不支持',
+    documentPip: 'documentPictureInPicture' in window ? '支持' : '不支持',
+    cookieStore: 'cookieStore' in window ? '支持' : '不支持',
+    trustedTypes: 'trustedTypes' in window ? '支持' : '不支持',
+    sanitizer: 'Sanitizer' in window ? '支持' : '不支持',
+    windowControlsOverlay: 'windowControlsOverlay' in navigator ? '支持' : '不支持',
+    orientationLock: screen.orientation?.lock ? '支持' : '不支持',
+  };
+}
+
+// ---------- 收集全部数据 ----------
+async function collectAllData() {
+  const [platform, battery, network, gpu, storage, media, ip, screenInfo, cpuMem, sensors, peripherals, xr, sysFeatures, btAvail] = await Promise.all([
+    getRealPlatform(), getBatteryData(), Promise.resolve(getNetworkData()), Promise.resolve(getGPUData()),
+    getStorageData(), getMediaData(), getIPData(), Promise.resolve(getScreenInfo()), Promise.resolve(getCPUAndMemory()),
+    getSensorsData(), Promise.resolve(getPeripheralsData()), getXRData(), Promise.resolve(getSystemFeatures()), getBluetoothAvailability()
+  ]);
+  deviceData = { platform, battery, network, gpu, storage, media, ip, screenInfo, cpuMem, sensors, peripherals, xr, sysFeatures, btAvail, ua: navigator.userAgent,
+    language: navigator.language, cookieEnabled: navigator.cookieEnabled, onLine: navigator.onLine, platformRaw: navigator.platform, isSecure: window.isSecureContext,
+    orientation: screen.orientation?.type, visibilityState: document.visibilityState, devicePixelRatio: devicePixelRatio };
+  return deviceData;
+}
+
+// ---------- 渲染基本信息 ----------
+function renderBasicInfo(d) {
+  const ip = d.ip || {}, screen = d.screenInfo || {}, cpu = d.cpuMem || {};
+  document.getElementById('basicInfoContainer').innerHTML = `
+    <div class="info-card full-width"><div class="info-label">系统架构</div><div class="info-value">${d.platform||'未知'}</div></div>
+    <div class="info-card"><div class="info-label">公网 IP</div><div class="info-value">${ip.pub}</div></div>
+    <div class="info-card"><div class="info-label">本地 IP</div><div class="info-value">${ip.local}</div></div>
+    <div class="info-card full-width"><div class="info-label">屏幕信息</div><div class="info-value">逻辑：${screen.logical||'?'} (CSS px)<br>物理：${screen.physical||'?'}<br>DPR：${screen.dpr||'?'}<br>视口：${screen.viewport||'?'}</div></div>
+    <div class="info-card full-width"><div class="info-label">CPU 与内存</div><div class="info-value">CPU 核心：${cpu.cores||'?'}<br>内存：${cpu.memory||'?'}</div></div>
+    <div class="info-card full-width"><div class="info-label">User Agent</div><div class="info-value" style="font-size:0.8rem; word-break:break-all;">${d.ua||'未知'}</div></div>
+  `;
+}
+
+// ---------- 各详情展示函数 ----------
+function showBattery() {
+  const b = deviceData.battery;
+  if(!b) return openModal('电池详情','<p>电池 API 不支持</p>');
+  openModal('电池详情',`<p><strong>电量：</strong>${b.level}%</p><p><strong>是否充电：</strong>${b.charging?'是':'否'}</p><p><strong>充满还需：</strong>${b.chargingTime===Infinity?'N/A':Math.round(b.chargingTime/60)+' 分钟'}</p><p><strong>剩余使用时间：</strong>${b.dischargingTime===Infinity?'N/A':Math.round(b.dischargingTime/60)+' 分钟'}</p>`);
+}
+function showNetwork() {
+  const n = deviceData.network;
+  if(!n) return openModal('网络详情','<p>网络 API 不支持</p>');
+  openModal('网络详情',`<p><strong>网络类型：</strong>${n.effectiveType||'未知'} (${n.type||'未知'})</p><p><strong>下行速度：</strong>${n.downlink!==undefined?n.downlink+' Mbps':'未知'}</p><p><strong>往返时间(RTT)：</strong>${n.rtt!==undefined?n.rtt+' ms':'未知'}</p><p><strong>省流量模式：</strong>${n.saveData?'已启用':'未启用'}</p>`);
+}
+function showGPU() {
+  const g = deviceData.gpu;
+  if(!g) return openModal('GPU 详情','<p>WebGL 调试信息不可用</p>');
+  openModal('GPU 详情',`<p><strong>供应商：</strong>${g.vendor||'未知'}</p><p><strong>渲染器：</strong>${g.renderer||'未知'}</p>`);
+}
+function showStorage() {
+  const s = deviceData.storage;
+  if(!s) return openModal('存储详情','<p>存储 API 不支持</p>');
+  const used = s.usage/1024/1024, quota = s.quota/1024/1024, pct = quota>0?(used/quota*100).toFixed(1):0;
+  openModal('存储详情',`<p><strong>已用空间：</strong>${used.toFixed(1)} MB</p><p><strong>总额度：</strong>${quota.toFixed(1)} MB</p><p><strong>使用比例：</strong>${pct}%</p>`);
+}
+function showMedia() {
+  const m = deviceData.media;
+  if(!m) return openModal('媒体设备','<p>无法获取，可能需要授权</p>');
+  openModal('媒体设备',`<p><strong>摄像头：</strong>${m.cams?.length?m.cams.join('；'):'无'}</p><p><strong>麦克风：</strong>${m.mics?.length?m.mics.join('；'):'无'}</p><p><strong>扬声器：</strong>${m.speakers?.length?m.speakers.join('；'):'无'}</p>`);
+}
+function showSensors() {
+  const s = deviceData.sensors||{};
+  openModal('传感器',`<p>加速度计：${s.accelerometer}</p><p>陀螺仪：${s.gyroscope}</p><p>绝对方向：${s.absoluteOrientation}</p><p>相对方向：${s.relativeOrientation}</p><p>重力：${s.gravity}</p><p>线性加速度：${s.linearAccel}</p><p>环境光：${s.ambientLight}</p><p>接近：${s.proximity}</p><p>磁力计：${s.magnetometer}</p>`);
+}
+function showPeripherals() {
+  const p = deviceData.peripherals||{}, bt = deviceData.btAvail||'未知';
+  openModal('外设与连接',`<p>HID：${p.hid}</p><p>串口：${p.serial}</p><p>USB：${p.usb}</p><p>蓝牙支持：${p.bluetooth} (可用性：${bt})</p><p>NFC：${p.nfc}</p><p>MIDI：${p.midi}</p><p>游戏手柄：${p.gamepad}</p><p>振动：${p.vibration}</p><p>最大触摸点：${p.maxTouchPoints}</p>`);
+}
+function showXR() {
+  const x = deviceData.xr||{};
+  if(!x.supported) return openModal('WebXR','<p>WebXR 不支持</p>');
+  openModal('WebXR',`<p><strong>VR 支持：</strong>${x.vr?'是':'否'}</p><p><strong>AR 支持：</strong>${x.ar?'是':'否'}</p><p><strong>Inline 支持：</strong>${x.inline?'是':'否'}</p>`);
+}
+function showFeatures1() {
+  const f = deviceData.sysFeatures||{};
+  openModal('系统特性',`<p>剪贴板：${f.clipboard}</p><p>通知：${f.notification}</p><p>唤醒锁定：${f.wakeLock}</p><p>空闲检测：${f.idleDetector}</p><p>支付请求：${f.paymentRequest}</p><p>后台同步：${f.backgroundSync}</p><p>定期同步：${f.periodicSync}</p><p>Web Share：${f.webShare}</p><p>联系人：${f.contacts}</p><p>条形码检测：${f.barcodeDetector}</p><p>人脸检测：${f.faceDetector}</p><p>文本检测：${f.textDetector}</p><p>WebAuthn：${f.webAuthn}</p><p>虚拟键盘：${f.virtualKeyboard}</p>`);
+}
+function showFeatures2() {
+  const f = deviceData.sysFeatures||{}, d = deviceData;
+  openModal('更多特性',`<p>取色器：${f.eyeDropper}</p><p>CPU压力：${f.computePressure}</p><p>Web Locks：${f.webLocks}</p><p>Reporting：${f.reportingObserver}</p><p>文件系统访问：${f.fileSystemAccess}</p><p>字体访问：${f.fontAccess}</p><p>语音识别：${f.speechRecognition}</p><p>语音合成：${f.speechSynthesis}</p><p>IndexedDB：${f.indexedDB}</p><p>Service Worker：${f.serviceWorker}</p><p>Shared Worker：${f.sharedWorker}</p><p>WebSocket：${f.webSocket}</p><p>WebRTC：${f.webRTC}</p><p>全屏：${f.fullscreen}</p><p>应用角标：${f.badging}</p><p>推送：${f.push}</p><p>权限API：${f.permissions}</p><p>地理位置：${f.geolocation}</p><p>存储桶：${f.storageBuckets}</p><p>WebGL1：${f.webgl1?'是':'否'}</p><p>WebGL2：${f.webgl2?'是':'否'}</p><p>WebGPU：${f.webgpu}</p><p>WebAssembly：${f.wasm}</p><p>WebCodecs：${f.webCodecs}</p><p>WebAudio：${f.webAudio}</p><p>投屏：${f.presentation}</p><p>画中画：${f.pip}</p><p>文档画中画：${f.documentPip}</p><p>Cookie Store：${f.cookieStore}</p><p>Trusted Types：${f.trustedTypes}</p><p>Sanitizer：${f.sanitizer}</p><p>窗口覆盖：${f.windowControlsOverlay}</p><p>方向锁定：${f.orientationLock}</p><p>语言：${d.language}</p><p>在线：${d.onLine?'是':'否'}</p><p>Cookie启用：${d.cookieEnabled?'是':'否'}</p><p>安全上下文：${d.isSecure?'是':'否'}</p><p>屏幕方向：${d.orientation}</p><p>可见性：${d.visibilityState}</p>`);
+}
+
+// ---------- 绑定按钮与刷新 ----------
+function bindButtons() {
+  document.querySelector('[data-detail="battery"]').addEventListener('click', showBattery);
+  document.querySelector('[data-detail="network"]').addEventListener('click', showNetwork);
+  document.querySelector('[data-detail="gpu"]').addEventListener('click', showGPU);
+  document.querySelector('[data-detail="storage"]').addEventListener('click', showStorage);
+  document.querySelector('[data-detail="media"]').addEventListener('click', showMedia);
+  document.querySelector('[data-detail="sensors"]').addEventListener('click', showSensors);
+  document.querySelector('[data-detail="peripherals"]').addEventListener('click', showPeripherals);
+  document.querySelector('[data-detail="webxr"]').addEventListener('click', showXR);
+  document.querySelector('[data-detail="features1"]').addEventListener('click', showFeatures1);
+  document.querySelector('[data-detail="features2"]').addEventListener('click', showFeatures2);
+}
+
+async function refreshAll() {
+  document.getElementById('basicInfoContainer').innerHTML = `<div class="loading-placeholder"><div class="loading-spinner"></div>加载中...</div>`;
+  await collectAllData();
+  renderBasicInfo(deviceData);
+}
+
+// 初始化
+refreshAll().then(bindButtons);
+document.getElementById('globalRefreshBtn').addEventListener('click', refreshAll);
+
+})();
+</script>
+</body>
+</html>
