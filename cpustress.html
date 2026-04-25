@@ -8,7 +8,7 @@
   <meta http-equiv="Expires" content="0">
   <title>CPU 压力测试 · SwCTools</title>
   <style>
-    /* ===== 主蓝色变量体系（与 index.html 一致） ===== */
+    /* ===== 主题变量（完全沿用之前版本，无改动） ===== */
     :root {
       --bg-body: #e8edf2;
       --panel-bg: rgba(255, 255, 255, 0.85);
@@ -21,9 +21,7 @@
       --cat-btn-color: #1a4059;
       --cat-btn-hover-bg: #c2d8ed;
       --jump-row-bg: #e7f0f9;
-      --jump-row-border: #c1d6ea;
       --input-border: #b3cce2;
-      --input-focus-border: #4f7fa3;
       --go-btn-bg: #4f7f9e;
       --go-btn-hover-bg: #3a6b8c;
       --tool-btn-bg: #cddef0;
@@ -36,6 +34,7 @@
       --corner-text-color: #3a6a8e;
       --fps-bg: rgba(255, 255, 255, 0.6);
       --stress-btn-bg: #4f7f9e;
+      --stress-btn-shadow: #2a4a6a;
     }
 
     [data-theme="dark"] {
@@ -50,9 +49,7 @@
       --cat-btn-color: #c0d8f0;
       --cat-btn-hover-bg: #2a5a8a;
       --jump-row-bg: #122a3e;
-      --jump-row-border: #1e4a6e;
       --input-border: #2a5a8a;
-      --input-focus-border: #5a9ac0;
       --go-btn-bg: #2a6a9e;
       --go-btn-hover-bg: #1a4a7a;
       --tool-btn-bg: #1e3a5a;
@@ -65,23 +62,34 @@
       --corner-text-color: #7a9ab0;
       --fps-bg: rgba(0, 0, 0, 0.5);
       --stress-btn-bg: #2a6a9e;
+      --stress-btn-shadow: #1a3a5a;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
     body { background: var(--bg-body); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 12px; position: relative; }
 
-    /* 角落文字（与 index.html 完全一致） */
     .corner-tl { position: fixed; top: 12px; left: 16px; font-size: 0.75rem; color: var(--corner-text-color); opacity: 0.8; z-index: 3000; pointer-events: none; }
     .corner-tr { position: fixed; top: 12px; right: 20px; font-size: 0.75rem; color: var(--corner-text-color); opacity: 0.8; z-index: 3000; pointer-events: none; background: var(--fps-bg); padding: 4px 12px; border-radius: 24px; border: 1px solid var(--panel-border); }
     .corner-br { position: fixed; bottom: 12px; right: 20px; font-size: 0.75rem; color: var(--corner-text-color); opacity: 0.8; z-index: 3000; pointer-events: none; }
-    .theme-toggle { position: fixed; bottom: 12px; left: 16px; font-size: 1rem; background: var(--cat-btn-bg); border: 1px solid var(--panel-border); color: var(--corner-text-color); padding: 6px 16px; border-radius: 32px; cursor: pointer; opacity: 0.85; transition: 0.2s; z-index: 3000; font-weight: 500; }
+    .theme-toggle {
+      position: fixed; bottom: 12px; left: 16px; font-size: 0.9rem; background: var(--cat-btn-bg);
+      border: 1px solid var(--panel-border); color: var(--corner-text-color); padding: 5px 14px;
+      border-radius: 32px; cursor: pointer; opacity: 0.85; transition: 0.2s; z-index: 3000;
+      font-weight: 500; -webkit-tap-highlight-color: transparent;
+    }
     .theme-toggle:hover { opacity: 1; background: var(--cat-btn-hover-bg); }
 
     .main-panel { max-width: 660px; width: 100%; background: var(--panel-bg); border-radius: 28px; box-shadow: 0 16px 30px -8px rgba(30, 65, 90, 0.18); border: 1px solid var(--panel-border); padding: 26px 28px 32px; }
     .title-section { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid var(--panel-border); }
     .title-section h1 { font-weight: 550; font-size: 2rem; color: var(--title-color); }
     .badge { color: var(--badge-color); background: var(--badge-bg); padding: 6px 18px; border-radius: 40px; font-size: 0.9rem; border: 1px solid var(--cat-btn-border); }
-    
+    .back-btn {
+      background: var(--cat-btn-bg); border: 1px solid var(--cat-btn-border); color: var(--cat-btn-color);
+      padding: 8px 18px; border-radius: 36px; font-weight: 520; text-decoration: none; transition: 0.15s;
+      -webkit-tap-highlight-color: transparent; display: inline-block; margin-bottom: 8px;
+    }
+    .back-btn:hover { background: var(--cat-btn-hover-bg); }
+
     .slider-container { margin: 18px 0 24px; }
     .slider-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: 500; color: var(--text-color); }
     .slider-header span { background: var(--jump-row-bg); padding: 5px 18px; border-radius: 36px; font-family: monospace; border: 1px solid var(--panel-border); }
@@ -90,28 +98,47 @@
     input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 24px; width: 24px; border-radius: 24px; background: var(--go-btn-bg); margin-top: -9px; box-shadow: 0 2px 8px rgba(30,75,110,0.3); border: 2px solid #d0e4f5; cursor: grab; }
 
     .stress-btn-group { display: flex; gap: 16px; margin: 20px 0 24px; }
-    .stress-btn { background: var(--stress-btn-bg); border: none; color: white; padding: 16px 20px; border-radius: 60px; font-weight: 650; font-size: 1.3rem; cursor: pointer; flex: 1; text-align: center; transition: all 0.15s; box-shadow: 0 6px 0 #1e3a5a; text-transform: uppercase; letter-spacing: 1px; }
-    .stress-btn.secondary { background: var(--tool-btn-bg); border: 1px solid var(--tool-btn-border); color: var(--tool-btn-color); box-shadow: 0 5px 0 #8a9eb0; }
-    .stress-btn:active { transform: translateY(3px); box-shadow: 0 3px 0 #1a2e4a; }
-    .stress-btn:disabled { opacity: 0.5; transform: none; box-shadow: 0 6px 0 #4a5a6a; background: #6a7a8a; cursor: not-allowed; }
+    .nav-btn {
+      background: var(--stress-btn-bg); border: none; color: white; padding: 16px 20px;
+      border-radius: 60px; font-weight: 650; font-size: 1.3rem; cursor: pointer; flex: 1;
+      text-align: center; transition: all 0.15s; box-shadow: 0 6px 0 var(--stress-btn-shadow);
+      text-transform: uppercase; letter-spacing: 1px; -webkit-tap-highlight-color: transparent;
+    }
+    .nav-btn.secondary {
+      background: var(--tool-btn-bg); border: 1px solid var(--tool-btn-border);
+      color: var(--tool-btn-color); box-shadow: 0 5px 0 #8a9eb0;
+    }
+    .nav-btn:active { transform: translateY(3px); box-shadow: 0 3px 0 var(--stress-btn-shadow); }
+    .nav-btn:disabled { opacity: 0.5; transform: none; box-shadow: 0 6px 0 #4a5a6a; background: #6a7a8a; cursor: not-allowed; }
 
-    .status-panel { background: var(--device-item-bg); border-radius: 24px; padding: 20px 24px; margin-top: 8px; border: 1px solid var(--panel-border); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; }
-    .status-item { display: flex; align-items: baseline; gap: 8px; }
-    .status-label { color: var(--device-label-color); font-size: 0.85rem; text-transform: uppercase; }
-    .status-value { font-weight: 700; font-size: 1.5rem; font-family: monospace; color: var(--title-color); }
-    #activeWorkers, #computeSpeed { color: #d96500; }
+    /* 状态面板新布局 */
+    .status-panel { background: var(--device-item-bg); border-radius: 24px; padding: 20px 24px; margin-top: 8px; border: 1px solid var(--panel-border); }
+    .status-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; }
+    .status-group { display: flex; flex: 1; justify-content: space-around; text-align: center; }
+    .status-group-item { display: flex; flex-direction: column; align-items: center; }
+    .status-label { color: var(--device-label-color); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
+    .status-value { font-weight: 700; font-size: 1.4rem; font-family: monospace; color: var(--title-color); line-height: 1.2; }
+    #activeWorkers { color: #d96500; }
+
+    .speed-row { display: flex; justify-content: space-between; align-items: baseline; padding: 8px 0; border-top: 1px dashed var(--panel-border); }
+    .speed-label { color: var(--device-label-color); font-size: 0.9rem; text-transform: uppercase; }
+    .speed-value-wrapper { display: flex; align-items: baseline; gap: 6px; }
+    .speed-value { font-weight: 700; font-size: 1.8rem; font-family: monospace; color: #d96500; }
+    .speed-unit { font-size: 1rem; color: var(--device-label-color); }
+
+    .freq-row { display: flex; justify-content: space-between; align-items: baseline; padding: 6px 0; }
+    .freq-label { color: var(--device-label-color); font-size: 0.85rem; }
+    .freq-value-wrapper { display: flex; align-items: baseline; gap: 4px; }
+    .freq-value { font-weight: 600; font-size: 1.3rem; font-family: monospace; color: var(--title-color); }
+    .freq-unit { font-size: 0.8rem; color: var(--device-label-color); }
 
     .warning-note { margin-top: 22px; font-size: 0.9rem; color: #cc7f2a; background: rgba(255, 140, 0, 0.08); padding: 14px 20px; border-radius: 24px; border-left: 6px solid #e06b00; }
     .hint-text { font-size: 0.8rem; color: var(--corner-text-color); margin-top: 6px; text-align: right; }
-    
-    .back-link { display: inline-block; margin-top: 16px; color: var(--corner-text-color); text-decoration: none; font-weight: 500; }
-    .back-link:hover { text-decoration: underline; }
 
-    @media (max-width: 480px) { .main-panel { padding: 20px 18px 24px; } .stress-btn-group { flex-direction: column; } .status-panel { flex-direction: column; align-items: flex-start; gap: 12px; } }
+    @media (max-width: 480px) { .main-panel { padding: 20px 18px 24px; } .stress-btn-group { flex-direction: column; } }
   </style>
 </head>
 <body>
-<!-- 与 index.html 完全一致的角落文字 -->
 <div class="corner-tl">不自由毋宁死 · 不自由毋寧死 · Give me liberty or give me death · 自由か、死か</div>
 <div class="corner-tr" id="fpsDisplay">FPS: --</div>
 <div class="corner-br">made by ZZC-jeizuchin, Github</div>
@@ -122,40 +149,95 @@
     <h1>CPU 压力测试</h1>
     <span class="badge" id="coresDisplay">--</span>
   </div>
+  <a href="index.html" class="back-btn">← 返回主站</a>
 
   <div class="slider-container">
-    <div class="slider-header">
-      <label>工作线程数 (最大32)</label>
-      <span id="threadValue">8</span>
-    </div>
+    <div class="slider-header"><label>工作线程数 (最大32)</label><span id="threadValue">8</span></div>
     <input type="range" id="threadSlider" min="1" max="32" value="8" step="1">
-    <div class="hint-text">硬件核心: <span id="coreHint"></span> · 推荐 8~12 线程发热最猛</div>
+    <div class="hint-text">硬件核心: <span id="coreHint"></span> · 可超线程</div>
   </div>
 
   <div class="stress-btn-group">
-    <button class="stress-btn" id="startBtn">开始</button>
-    <button class="stress-btn secondary" id="stopBtn" disabled>停止</button>
+    <button class="nav-btn" id="startBtn">开始</button>
+    <button class="nav-btn secondary" id="stopBtn" disabled>停止</button>
   </div>
 
   <div class="status-panel">
-    <div class="status-item"><span class="status-label">状态</span><span class="status-value" id="statusText">空闲</span></div>
-    <div class="status-item"><span class="status-label">运行时长</span><span class="status-value" id="timerDisplay">00:00</span></div>
-    <div class="status-item"><span class="status-label">活跃线程</span><span class="status-value" id="activeWorkers">0</span></div>
-    <div class="status-item"><span class="status-label">计算速度</span><span class="status-value" id="computeSpeed">0 ops</span></div>
+    <!-- 第一行：状态、运行时长、活跃线程 -->
+    <div class="status-row">
+      <div class="status-group">
+        <div class="status-group-item">
+          <span class="status-label">状态</span>
+          <span class="status-value" id="statusText">空闲</span>
+        </div>
+        <div class="status-group-item">
+          <span class="status-label">运行时长</span>
+          <span class="status-value" id="timerDisplay">00:00</span>
+        </div>
+        <div class="status-group-item">
+          <span class="status-label">活跃线程</span>
+          <span class="status-value" id="activeWorkers">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 当前速度行 -->
+    <div class="speed-row">
+      <span class="speed-label">当前速度</span>
+      <div class="speed-value-wrapper">
+        <span class="speed-value" id="currentSpeed">0</span>
+        <span class="speed-unit" id="currentSpeedUnit">ops</span>
+      </div>
+    </div>
+
+    <!-- 平均速度行 -->
+    <div class="speed-row">
+      <span class="speed-label">平均速度</span>
+      <div class="speed-value-wrapper">
+        <span class="speed-value" id="avgSpeed">0</span>
+        <span class="speed-unit" id="avgSpeedUnit">ops</span>
+      </div>
+    </div>
+
+    <!-- 估算频率：四行（当前 GHz、当前 MHz、平均 GHz、平均 MHz） -->
+    <div class="freq-row">
+      <span class="freq-label">估算当前频率 (GHz)</span>
+      <div class="freq-value-wrapper">
+        <span class="freq-value" id="currentFreqGHz">0.000</span>
+        <span class="freq-unit">GHz</span>
+      </div>
+    </div>
+    <div class="freq-row">
+      <span class="freq-label">估算当前频率 (MHz)</span>
+      <div class="freq-value-wrapper">
+        <span class="freq-value" id="currentFreqMHz">0.0</span>
+        <span class="freq-unit">MHz</span>
+      </div>
+    </div>
+    <div class="freq-row">
+      <span class="freq-label">估算平均频率 (GHz)</span>
+      <div class="freq-value-wrapper">
+        <span class="freq-value" id="avgFreqGHz">0.000</span>
+        <span class="freq-unit">GHz</span>
+      </div>
+    </div>
+    <div class="freq-row">
+      <span class="freq-label">估算平均频率 (MHz)</span>
+      <div class="freq-value-wrapper">
+        <span class="freq-value" id="avgFreqMHz">0.0</span>
+        <span class="freq-unit">MHz</span>
+      </div>
+    </div>
   </div>
 
-  <div class="warning-note">
-    线程数超过物理核心时，CPU调度压力剧增，可能造成系统短暂卡顿。平板请留意散热。
-  </div>
-  
-  <a href="index.html" class="back-link">← 返回 SwCTools 主站</a>
+  <div class="warning-note">线程数超过物理核心时，CPU调度压力剧增，可能造成系统短暂卡顿。平板请留意散热。</div>
 </div>
 
 <script>
   (function(){
     "use strict";
 
-    // 深色模式
+    // ---------- 主题切换 ----------
     const themeToggle = document.getElementById('themeToggle');
     const currentTheme = localStorage.getItem('swc_theme') || 'light';
     document.documentElement.setAttribute('data-theme', currentTheme);
@@ -167,7 +249,7 @@
       themeToggle.textContent = newTheme === 'light' ? '深色' : '亮色';
     });
 
-    // 帧率显示
+    // ---------- FPS 显示 ----------
     const fpsDisplay = document.getElementById('fpsDisplay');
     let frameCount = 0, lastFpsUpdate = performance.now();
     function updateFPS() {
@@ -182,7 +264,7 @@
     }
     requestAnimationFrame(updateFPS);
 
-    // DOM 元素
+    // ---------- DOM 元素 ----------
     const coresDisplay = document.getElementById('coresDisplay');
     const threadSlider = document.getElementById('threadSlider');
     const threadValue = document.getElementById('threadValue');
@@ -191,20 +273,44 @@
     const statusText = document.getElementById('statusText');
     const timerDisplay = document.getElementById('timerDisplay');
     const activeWorkersSpan = document.getElementById('activeWorkers');
-    const computeSpeedSpan = document.getElementById('computeSpeed');
+    const currentSpeedSpan = document.getElementById('currentSpeed');
+    const currentSpeedUnit = document.getElementById('currentSpeedUnit');
+    const avgSpeedSpan = document.getElementById('avgSpeed');
+    const avgSpeedUnit = document.getElementById('avgSpeedUnit');
     const coreHint = document.getElementById('coreHint');
 
-    let workers = [];
-    let isRunning = false;
-    let startTime = null;
-    let timerInterval = null;
-    let hardwareCores = navigator.hardwareConcurrency || 4;
-    
-    // 操作数累加器
-    let accumulatedOps = 0;
-    let speedInterval = null;
-    let activeWorkerCount = 0;
-    
+    const currentFreqGHz = document.getElementById('currentFreqGHz');
+    const currentFreqMHz = document.getElementById('currentFreqMHz');
+    const avgFreqGHz = document.getElementById('avgFreqGHz');
+    const avgFreqMHz = document.getElementById('avgFreqMHz');
+
+    // ---------- 架构检测与校准后的每 ops 周期数 ----------
+    function detectArchitecture() {
+      const ua = navigator.userAgent;
+      const platform = navigator.platform;
+      if (/arm|aarch64|Android|iPad|iPhone|iPod/i.test(ua) || /arm/i.test(platform)) {
+        return 'arm';
+      }
+      if (/Win64|Win32|Windows|Intel|AMD64|x86_64/i.test(ua) || /Win/i.test(platform)) {
+        return 'x86';
+      }
+      if (/Mac/i.test(platform) && !/iPhone|iPad/i.test(ua)) {
+        return 'x86'; // 假设 Intel Mac
+      }
+      return 'unknown';
+    }
+
+    const arch = detectArchitecture();
+    // 校准后的常数：ARM 400k，x86 250k，其他 350k
+    let CYCLES_PER_OP = 350000;
+    if (arch === 'arm') {
+      CYCLES_PER_OP = 400000;
+    } else if (arch === 'x86') {
+      CYCLES_PER_OP = 250000;
+    }
+
+    // ---------- 常量与状态 ----------
+    const hardwareCores = navigator.hardwareConcurrency || 4;
     const MAX_THREADS = 32;
     threadSlider.max = MAX_THREADS;
     const defaultThreads = Math.min(hardwareCores, MAX_THREADS);
@@ -213,19 +319,100 @@
     coresDisplay.textContent = `${hardwareCores} 核心`;
     coreHint.textContent = hardwareCores;
 
-    threadSlider.addEventListener('input', () => threadValue.textContent = threadSlider.value);
+    let workers = [];
+    let isRunning = false;
+    let startTime = null;
+    let timerInterval = null;
+    let uiUpdateInterval = null;       // 2Hz 刷新
 
+    let totalOps = 0;
+    let lastTotalOps = 0;
+    let lastUIUpdateTime = 0;
+
+    // ---------- 辅助函数 ----------
     function formatElapsed(seconds) {
       if (seconds < 0) seconds = 0;
-      const hrs = Math.floor(seconds / 3600);
-      const mins = Math.floor((seconds % 3600) / 60);
-      const secs = Math.floor(seconds % 60);
-      return hrs > 0 ? `${hrs.toString().padStart(2,'0')}:${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}` : `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+      const h = Math.floor(seconds / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      const s = Math.floor(seconds % 60);
+      return h > 0 
+        ? `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`
+        : `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+    }
+
+    function formatOpsWithUnit(ops) {
+      let value, unit;
+      if (ops >= 1e9) { value = ops / 1e9; unit = 'G ops'; }
+      else if (ops >= 1e6) { value = ops / 1e6; unit = 'M ops'; }
+      else if (ops >= 1e3) { value = ops / 1e3; unit = 'K ops'; }
+      else { value = ops; unit = 'ops'; }
+      return { value: value.toFixed(ops >= 1e3 ? 2 : 0), unit };
     }
 
     function updateTimerDisplay() {
-      if (startTime && isRunning) timerDisplay.textContent = formatElapsed((Date.now() - startTime) / 1000);
-      else timerDisplay.textContent = '00:00';
+      if (startTime && isRunning) {
+        timerDisplay.textContent = formatElapsed((Date.now() - startTime) / 1000);
+      } else {
+        timerDisplay.textContent = '00:00';
+      }
+    }
+
+    // 核心：2Hz UI 更新
+    function updateUI() {
+      if (!isRunning) return;
+
+      const now = Date.now();
+      const elapsed = (now - lastUIUpdateTime) / 1000;
+
+      const currentOps = totalOps - lastTotalOps;
+      const currentSpeed = elapsed > 0 ? currentOps / elapsed : 0;
+
+      // 格式化当前速度
+      const cur = formatOpsWithUnit(currentSpeed);
+      currentSpeedSpan.textContent = cur.value;
+      currentSpeedUnit.textContent = cur.unit + '/s';
+
+      // 平均速度
+      const totalElapsed = startTime ? (now - startTime) / 1000 : 0;
+      const avgSpeed = totalElapsed > 0 ? totalOps / totalElapsed : 0;
+      const avg = formatOpsWithUnit(avgSpeed);
+      avgSpeedSpan.textContent = avg.value;
+      avgSpeedUnit.textContent = avg.unit + '/s';
+
+      // 频率估算：频率(Hz) = ops/s * CYCLES_PER_OP
+      const currentFreqHz = currentSpeed * CYCLES_PER_OP;
+      const avgFreqHz = avgSpeed * CYCLES_PER_OP;
+
+      currentFreqGHz.textContent = (currentFreqHz / 1e9).toFixed(3);
+      currentFreqMHz.textContent = (currentFreqHz / 1e6).toFixed(1);
+      avgFreqGHz.textContent = (avgFreqHz / 1e9).toFixed(3);
+      avgFreqMHz.textContent = (avgFreqHz / 1e6).toFixed(1);
+
+      lastTotalOps = totalOps;
+      lastUIUpdateTime = now;
+    }
+
+    function startUIUpdates() {
+      totalOps = 0;
+      lastTotalOps = 0;
+      lastUIUpdateTime = Date.now();
+      if (uiUpdateInterval) clearInterval(uiUpdateInterval);
+      uiUpdateInterval = setInterval(updateUI, 500);
+    }
+
+    function stopUIUpdates() {
+      if (uiUpdateInterval) {
+        clearInterval(uiUpdateInterval);
+        uiUpdateInterval = null;
+      }
+      currentSpeedSpan.textContent = '0';
+      currentSpeedUnit.textContent = 'ops';
+      avgSpeedSpan.textContent = '0';
+      avgSpeedUnit.textContent = 'ops';
+      currentFreqGHz.textContent = '0.000';
+      currentFreqMHz.textContent = '0.0';
+      avgFreqGHz.textContent = '0.000';
+      avgFreqMHz.textContent = '0.0';
     }
 
     function startTimer() {
@@ -236,50 +423,29 @@
     }
 
     function stopTimer() {
-      if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
       startTime = null;
       timerDisplay.textContent = '00:00';
-    }
-
-    // 更新计算速度显示 (每秒调用)
-    function updateSpeedDisplay() {
-      const opsThisSecond = accumulatedOps;
-      accumulatedOps = 0;
-      
-      if (opsThisSecond > 0) {
-        computeSpeedSpan.textContent = opsThisSecond > 1e9 ? `${(opsThisSecond/1e9).toFixed(2)} G ops` :
-                                        (opsThisSecond > 1e6 ? `${(opsThisSecond/1e6).toFixed(2)} M ops` :
-                                        `${opsThisSecond} ops`);
-      }
-    }
-
-    function startSpeedMonitor() {
-      accumulatedOps = 0;
-      if (speedInterval) clearInterval(speedInterval);
-      speedInterval = setInterval(updateSpeedDisplay, 1000);
-    }
-
-    function stopSpeedMonitor() {
-      if (speedInterval) { clearInterval(speedInterval); speedInterval = null; }
-      accumulatedOps = 0;
-      computeSpeedSpan.textContent = '0 ops';
     }
 
     function setUIForRunning(running) {
       isRunning = running;
       if (running) {
-        statusText.innerHTML = '满载中';
+        statusText.textContent = '满载中';
         startBtn.disabled = true;
         stopBtn.disabled = false;
         threadSlider.disabled = true;
-        startSpeedMonitor();
+        startUIUpdates();
       } else {
-        statusText.innerHTML = '空闲';
+        statusText.textContent = '空闲';
         startBtn.disabled = false;
         stopBtn.disabled = true;
         threadSlider.disabled = false;
         activeWorkersSpan.textContent = '0';
-        stopSpeedMonitor();
+        stopUIUpdates();
       }
     }
 
@@ -287,93 +453,82 @@
       workers.forEach(w => { try { w.terminate(); } catch(e) {} });
       workers = [];
       activeWorkersSpan.textContent = '0';
-      activeWorkerCount = 0;
     }
 
     function fullStop() {
-      if (!isRunning && workers.length === 0) { setUIForRunning(false); stopTimer(); return; }
+      if (!isRunning && workers.length === 0) {
+        setUIForRunning(false);
+        stopTimer();
+        return;
+      }
       terminateAllWorkers();
       stopTimer();
       setUIForRunning(false);
     }
 
-    // 创建 Worker（增强版：汇报阈值400，计算强度进一步提升）
+    // ---------- Worker 创建（对 JS 调度友好的小批量计算）----------
     function createWorker() {
       const workerScript = `
         let iteration = 0;
-        // 扩大数组尺寸，增加缓存压力
-        const size = 4096;
-        let arr1 = new Float64Array(size);
-        let arr2 = new Float64Array(size);
-        let arr3 = new Float64Array(size);
-        let arr4 = new Float64Array(size);
-        for (let i = 0; i < size; i++) {
-          arr1[i] = Math.random() * 1000.0;
-          arr2[i] = Math.random() * 1000.0;
-          arr4[i] = Math.random() * 1000.0;
-        }
+        const REPORT_THRESHOLD = 80;   // 每 80 次汇报一次，平衡通信与计算
+        const size = 1024;
+        let arr1 = new Float64Array(size), arr2 = new Float64Array(size), arr3 = new Float64Array(size);
         
+        for (let i = 0; i < size; i++) {
+          arr1[i] = Math.random() * 1000;
+          arr2[i] = Math.random() * 1000;
+        }
+
         function intenseLoop() {
-          let dot = 0.0;
-          // 点积增加维度
+          let dot = 0;
+          for (let i = 0; i < size; i++) dot += arr1[i] * arr2[i];
+          
+          let trig = 0;
+          for (let i = 0; i < 2000; i++) {
+            trig += Math.sin(i * 0.017) * Math.cos(i * 0.013) + Math.tan(i * 0.007);
+            trig += Math.exp(Math.log(Math.abs(trig) + 1)) * 0.001;
+          }
+          
           for (let i = 0; i < size; i++) {
-            dot += arr1[i] * arr2[i] + arr4[i] * 0.5;
+            arr3[i] = arr1[i] * 1.5 + arr2[i] * 0.7 + dot * 0.0001 + trig * 0.000001;
           }
-          let trigSum = 0.0;
-          // 三角函数迭代次数翻倍
-          for (let i = 0; i < 16000; i++) {
-            trigSum += Math.sin(i * 0.017) * Math.cos(i * 0.013) + Math.tan(i * 0.007);
-            trigSum += Math.exp(Math.log(Math.abs(trigSum) + 1.0)) * 0.001;
-          }
-          for (let i = 0; i < size; i++) {
-            arr3[i] = arr1[i] * 1.5 + arr2[i] * 0.7 + arr4[i] * 0.3 + dot * 0.0001 + trigSum * 0.000001;
-          }
+          
           let intSum = 0;
-          // 整数位运算循环增加
-          for (let i = 0; i < 40000; i++) {
+          for (let i = 0; i < 5000; i++) {
             intSum += (i * 7919) ^ (i << 2);
             intSum = intSum >>> 0;
           }
-          // 增加乘加操作，使流水线更满
-          arr1[0] = (arr1[0] + dot * 1e-9 + trigSum * 1e-12 + intSum * 1e-9) % 1000.0;
-          arr2[0] = (arr2[0] + arr3[0] * 0.0001 + arr4[0] * 0.0001) % 1000.0;
-          arr4[0] = (arr4[0] + arr1[0] * 0.0001) % 1000.0;
-          return dot + trigSum + intSum;
+          
+          arr1[0] = (arr1[0] + dot * 1e-9 + trig * 1e-12 + intSum * 1e-9) % 1000;
+          arr2[0] = (arr2[0] + arr3[0] * 0.0001) % 1000;
         }
 
-        // 持续计算，每完成 400 次循环汇报一次（汇报阈值提高到400）
         while (true) {
           intenseLoop();
           iteration++;
-          if (iteration >= 400) {
+          if (iteration >= REPORT_THRESHOLD) {
             self.postMessage({ ops: iteration });
             iteration = 0;
           }
-          // 边界检查
           if (arr1[0] > 1e9) arr1[0] = Math.random() * 1000;
           if (arr2[0] > 1e9) arr2[0] = Math.random() * 1000;
-          if (arr4[0] > 1e9) arr4[0] = Math.random() * 1000;
         }
       `;
-      
       const blob = new Blob([workerScript], { type: 'application/javascript' });
       const workerUrl = URL.createObjectURL(blob);
       const worker = new Worker(workerUrl);
       
       worker.onmessage = (e) => {
         if (e.data && typeof e.data.ops === 'number') {
-          accumulatedOps += e.data.ops;
+          totalOps += e.data.ops;
         }
       };
-      
       worker.onerror = (e) => {
-        console.warn('Worker error', e);
+        console.warn('Worker error:', e);
         const idx = workers.indexOf(worker);
         if (idx > -1) workers.splice(idx, 1);
         activeWorkersSpan.textContent = workers.length;
-        activeWorkerCount = workers.length;
       };
-      
       URL.revokeObjectURL(workerUrl);
       return worker;
     }
@@ -384,30 +539,36 @@
       if (isNaN(threadCount) || threadCount < 1) threadCount = 1;
       
       setUIForRunning(true);
-      activeWorkerCount = threadCount;
       
       for (let i = 0; i < threadCount; i++) {
         try {
           workers.push(createWorker());
         } catch (e) {
-          console.error('创建Worker失败', e);
+          console.error(e);
         }
       }
-      
       activeWorkersSpan.textContent = workers.length;
       startTimer();
       
       if (workers.length === 0) {
         fullStop();
-        alert('无法创建工作线程，请刷新重试。');
+        alert('无法创建工作线程');
       }
     }
 
+    // ---------- 事件绑定 ----------
+    threadSlider.addEventListener('input', () => {
+      threadValue.textContent = threadSlider.value;
+    });
     startBtn.addEventListener('click', startBurn);
     stopBtn.addEventListener('click', fullStop);
-    window.addEventListener('beforeunload', () => workers.forEach(w => { try { w.terminate(); } catch(e) {} }));
+    window.addEventListener('beforeunload', () => {
+      workers.forEach(w => { try { w.terminate(); } catch(e) {} });
+    });
 
+    // 初始化显示
     threadValue.textContent = threadSlider.value;
+    statusText.textContent = '空闲';
   })();
 </script>
 </body>

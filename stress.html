@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>三烤 · CPU+GPU+内存 · SwCTools</title>
+  <style>
+    /* 主题变量（与主站一致） */
+    :root {
+      --bg-body: #e8edf2;
+      --panel-bg: rgba(255, 255, 255, 0.85);
+      --panel-border: #bdd1e6;
+      --title-color: #1e4b6e;
+      --badge-bg: #d0e2f0;
+      --badge-color: #2c6182;
+      --cat-btn-bg: #d9e8f4;
+      --cat-btn-border: #adc7e0;
+      --cat-btn-color: #1a4059;
+      --cat-btn-hover-bg: #c2d8ed;
+      --jump-row-bg: #e7f0f9;
+      --input-border: #b3cce2;
+      --go-btn-bg: #4f7f9e;
+      --go-btn-hover-bg: #3a6b8c;
+      --tool-btn-bg: #cddef0;
+      --tool-btn-border: #a3bed8;
+      --tool-btn-color: #1a4765;
+      --device-item-bg: #eaf2fc;
+      --device-label-color: #1e4b6e;
+      --device-value-color: #0d3450;
+      --text-color: #173e58;
+      --corner-text-color: #3a6a8e;
+      --fps-bg: rgba(255, 255, 255, 0.6);
+      --stress-btn-bg: #4f7f9e;
+      --stress-btn-shadow: #2a4a6a;
+    }
+
+    [data-theme="dark"] {
+      --bg-body: #0a0f14;
+      --panel-bg: rgba(13, 27, 42, 0.9);
+      --panel-border: #1e3a5a;
+      --title-color: #a0c4e8;
+      --badge-bg: #1a3a5c;
+      --badge-color: #b0d0f0;
+      --cat-btn-bg: #1e3a5a;
+      --cat-btn-border: #2a5a8a;
+      --cat-btn-color: #c0d8f0;
+      --cat-btn-hover-bg: #2a5a8a;
+      --jump-row-bg: #122a3e;
+      --input-border: #2a5a8a;
+      --go-btn-bg: #2a6a9e;
+      --go-btn-hover-bg: #1a4a7a;
+      --tool-btn-bg: #1e3a5a;
+      --tool-btn-border: #2a5a8a;
+      --tool-btn-color: #c0d8f0;
+      --device-item-bg: #122a3e;
+      --device-label-color: #a0c4e8;
+      --device-value-color: #d0e0f0;
+      --text-color: #c0d8f0;
+      --corner-text-color: #7a9ab0;
+      --fps-bg: rgba(0, 0, 0, 0.5);
+      --stress-btn-bg: #2a6a9e;
+      --stress-btn-shadow: #1a3a5a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, sans-serif; }
+    body { background: var(--bg-body); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 12px; }
+    .theme-toggle {
+      position: fixed; bottom: 12px; left: 16px; font-size: 0.9rem; background: var(--cat-btn-bg);
+      border: 1px solid var(--panel-border); color: var(--corner-text-color); padding: 5px 14px;
+      border-radius: 32px; cursor: pointer; z-index: 3000; font-weight: 500;
+    }
+    .main-panel { max-width: 1300px; width: 100%; background: var(--panel-bg); border-radius: 28px; border: 1px solid var(--panel-border); padding: 24px 28px 32px; }
+    .title-row { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+    .title-row h1 { font-weight: 550; font-size: 2rem; color: var(--title-color); }
+    .badge { color: var(--badge-color); background: var(--badge-bg); padding: 6px 18px; border-radius: 40px; font-size: 0.9rem; border: 1px solid var(--cat-btn-border); }
+    .back-btn {
+      display: inline-block; background: var(--cat-btn-bg); border: 1px solid var(--cat-btn-border);
+      color: var(--cat-btn-color); padding: 8px 18px; border-radius: 36px; font-weight: 520;
+      text-decoration: none; margin: 8px 0 16px;
+    }
+    .param-panel { background: var(--device-item-bg); border-radius: 24px; padding: 20px; margin-bottom: 20px; border: 1px solid var(--panel-border); }
+    /* 两行布局 */
+    .param-row { display: flex; flex-wrap: wrap; gap: 20px; }
+    .mem-group { flex: 1; min-width: 260px; }
+    .cpu-gpu-group { flex: 2; display: flex; flex-wrap: wrap; gap: 20px; }
+    .cpu-group, .gpu-group { flex: 1; min-width: 220px; }
+    .param-group h3 { font-size: 1rem; margin-bottom: 12px; color: var(--device-label-color); border-bottom: 1px solid var(--panel-border); padding-bottom: 4px; }
+    .slider-item { margin: 10px 0; }
+    .slider-item label { display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--text-color); }
+    input[type=range] { width: 100%; margin: 4px 0; -webkit-appearance: none; background: transparent; }
+    input[type=range]::-webkit-slider-runnable-track { height: 6px; background: var(--jump-row-bg); border-radius: 8px; border: 1px solid var(--panel-border); }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 20px; width: 20px; border-radius: 20px; background: var(--go-btn-bg); margin-top: -8px; border: 2px solid #d0e4f5; cursor: grab; }
+    .dropdown-item { display: flex; align-items: center; gap: 8px; margin: 8px 0; color: var(--text-color); }
+    select { padding: 6px 10px; border-radius: 20px; border: 1px solid var(--input-border); background: var(--panel-bg); color: var(--text-color); }
+    .action-bar { display: flex; justify-content: center; gap: 20px; margin-top: 10px; }
+    button {
+      padding: 14px 36px; border-radius: 40px; border: none; font-weight: 600; font-size: 1.2rem;
+      cursor: pointer; background: var(--tool-btn-bg); border: 1px solid var(--tool-btn-border);
+      color: var(--tool-btn-color); box-shadow: 0 4px 0 var(--stress-btn-shadow);
+      transition: none; /* 无动效 */
+    }
+    button.primary { background: var(--stress-btn-bg); color: white; border: none; }
+    button:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--stress-btn-shadow); }
+    button:disabled { opacity: 0.5; transform: none; box-shadow: 0 4px 0 var(--stress-btn-shadow); cursor: not-allowed; }
+    .main-row { display: flex; flex-wrap: wrap; gap: 20px; }
+    .canvas-area { flex: 0 0 240px; background: #0b1219; border-radius: 20px; padding: 6px; border: 2px solid var(--panel-border); }
+    canvas { display: block; width: 100%; height: auto; aspect-ratio: 9/16; border-radius: 16px; background: black; }
+    .monitor-area { flex: 1; min-width: 280px; background: var(--device-item-bg); border-radius: 20px; padding: 18px; border: 1px solid var(--panel-border); }
+    .monitor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; }
+    .monitor-item { display: flex; justify-content: space-between; border-bottom: 1px dashed var(--panel-border); padding-bottom: 4px; }
+    .monitor-label { font-weight: 500; color: var(--device-label-color); }
+    .monitor-value { font-family: monospace; font-weight: 600; color: var(--title-color); }
+    .hint-text { margin-top: 12px; font-size: 0.8rem; color: var(--corner-text-color); text-align: right; }
+    .corner-text { position: fixed; bottom: 12px; right: 20px; font-size: 0.75rem; color: var(--corner-text-color); opacity: 0.8; }
+    .global-status-badge { margin-left: auto; padding: 6px 18px; background: var(--badge-bg); border-radius: 40px; color: var(--badge-color); }
+    @media (max-width: 700px) { .main-panel { padding: 14px 16px; } .canvas-area { flex: 0 0 180px; } }
+  </style>
+</head>
+<body>
+<button class="theme-toggle" id="themeToggle" aria-label="切换深色模式">深色</button>
+<div class="corner-text">made by ZZC-jeizuchin, Github</div>
+
+<div class="main-panel">
+  <div class="title-row">
+    <h1>三烤 · CPU + GPU + 内存</h1>
+    <span class="badge" id="webglBadge">WebGL ?</span>
+  </div>
+  <a href="index.html" class="back-btn">← 返回主站</a>
+
+  <!-- 参数面板（两行布局） -->
+  <div class="param-panel">
+    <!-- 第一行：左侧内存，右侧CPU+GPU挤在一起 -->
+    <div class="param-row">
+      <!-- 内存组（左侧） -->
+      <div class="mem-group">
+        <div class="param-group">
+          <h3>内存压力</h3>
+          <div class="slider-item">
+            <label>容量(GB) <span id="memGbValue">2.0</span></label>
+            <input type="range" id="memGbSlider" min="0.1" max="8" value="2.0" step="0.1">
+          </div>
+          <div class="slider-item">
+            <label>Worker 数 <span id="memWorkersValue">8</span></label>
+            <input type="range" id="memWorkersSlider" min="1" max="16" value="8" step="1">
+          </div>
+          <div class="dropdown-item">
+            <label>分块(MB)</label>
+            <select id="memBlockSelect" style="flex:1;">
+              <option value="1">1</option><option value="4">4</option><option value="16">16</option><option value="32">32</option>
+              <option value="64" selected>64</option><option value="128">128</option><option value="256">256</option>
+              <option value="512">512</option><option value="1024">1024</option>
+            </select>
+          </div>
+          <div class="dropdown-item">
+            <label>视图</label>
+            <select id="memViewSelect" style="flex:1;">
+              <option value="uint8" selected>Uint8</option><option value="uint32">Uint32</option>
+            </select>
+          </div>
+          <div style="font-size:0.8rem; color:var(--corner-text-color);">设备内存: <span id="memDeviceMemBadge">--</span> GB | 上限 ~<span id="memMaxHint"></span> GB</div>
+        </div>
+      </div>
+
+      <!-- CPU+GPU 组（右侧挤在一起） -->
+      <div class="cpu-gpu-group">
+        <div class="cpu-group">
+          <div class="param-group">
+            <h3>CPU 压力</h3>
+            <div class="slider-item">
+              <label>线程数 <span id="cpuThreadValue">8</span></label>
+              <input type="range" id="cpuThreadSlider" min="1" max="32" value="8" step="1">
+            </div>
+            <div style="font-size:0.8rem; color:var(--corner-text-color);">硬件核心: <span id="cpuCoreHint">4</span> | 架构: <span id="cpuArchHint">--</span></div>
+          </div>
+        </div>
+        <div class="gpu-group">
+          <div class="param-group">
+            <h3>GPU 压力</h3>
+            <div class="slider-item">
+              <label>压力档位 <span id="gpuIntensityVal">20</span></label>
+              <input type="range" id="gpuIntensitySlider" min="1" max="100" value="20" step="1">
+            </div>
+            <div class="dropdown-item">
+              <label>分辨率</label>
+              <select id="gpuResolutionSelect" style="flex:1;">
+                <option value="160x90">160x90</option>
+                <option value="320x180">320x180</option>
+                <option value="360x640" selected>360x640</option>
+                <option value="640x360">640x360</option>
+                <option value="854x480">854x480</option>
+                <option value="1280x720">1280x720</option>
+                <option value="1920x1080">1920x1080</option>
+                <option value="2560x1440">2560x1440 (2K)</option>
+                <option value="3840x2160">3840x2160 (4K)</option>
+              </select>
+            </div>
+            <div class="dropdown-item">
+              <label>MSAA</label>
+              <select id="gpuMsaaSelect" style="flex:1;">
+                <option value="0">关闭</option><option value="2">2x</option><option value="4">4x</option><option value="8" selected>8x</option>
+              </select>
+            </div>
+            <div style="margin-top:4px; color:var(--corner-text-color);">GPU: <span id="gpuInfoBadge">检测中</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 第二行：按钮居中 -->
+    <div class="action-bar">
+      <button id="globalStartBtn" class="primary">开始三烤</button>
+      <button id="globalStopBtn" disabled>停止</button>
+      <span id="globalStatus" class="global-status-badge">就绪</span>
+    </div>
+  </div>
+
+  <!-- 画布 + 监控（竖版画布左，监控右） -->
+  <div class="main-row">
+    <div class="canvas-area">
+      <canvas id="mainCanvas" width="360" height="640"></canvas>
+    </div>
+    <div class="monitor-area">
+      <div class="monitor-grid">
+        <div class="monitor-item"><span class="monitor-label">状态</span><span class="monitor-value" id="monitorStatus">空闲</span></div>
+        <div class="monitor-item"><span class="monitor-label">运行时长</span><span class="monitor-value" id="monitorTimer">00:00</span></div>
+        <div class="monitor-item"><span class="monitor-label">CPU线程</span><span class="monitor-value" id="monitorCpuThreads">0</span></div>
+        <div class="monitor-item"><span class="monitor-label">GPU分辨率</span><span class="monitor-value" id="monitorGpuRes">360x640</span></div>
+        <div class="monitor-item"><span class="monitor-label">GPU FPS</span><span class="monitor-value" id="monitorGpuFps">--</span></div>
+        <div class="monitor-item"><span class="monitor-label">内存占块</span><span class="monitor-value" id="monitorMemChunks">0</span></div>
+        <div class="monitor-item"><span class="monitor-label">内存瞬时</span><span class="monitor-value"><span id="monitorMemSpeed">0.00</span> GB/s</span></div>
+        <div class="monitor-item"><span class="monitor-label">内存平均</span><span class="monitor-value"><span id="monitorMemAvgSpeed">0.000</span> GB/s</span></div>
+        <div class="monitor-item"><span class="monitor-label">CPU瞬时</span><span class="monitor-value"><span id="monitorCpuCurSpeed">0</span> <span id="monitorCpuCurUnit">ops</span>/s</span></div>
+        <div class="monitor-item"><span class="monitor-label">CPU平均</span><span class="monitor-value"><span id="monitorCpuAvgSpeed">0</span> <span id="monitorCpuAvgUnit">ops</span>/s</span></div>
+        <div class="monitor-item"><span class="monitor-label">CPU频率(当前)</span><span class="monitor-value"><span id="monitorCpuCurFreq">0.000</span> GHz</span></div>
+        <div class="monitor-item"><span class="monitor-label">CPU频率(平均)</span><span class="monitor-value"><span id="monitorCpuAvgFreq">0.000</span> GHz</span></div>
+        <div class="monitor-item"><span class="monitor-label">内存累计写入</span><span class="monitor-value"><span id="monitorMemTotal">0.000</span> GB</span></div>
+      </div>
+      <div class="hint-text">三模块同时满载 · 注意散热</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    "use strict";
+
+    // 主题切换
+    const themeToggle = document.getElementById('themeToggle');
+    const currentTheme = localStorage.getItem('swc_theme') || 'light';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    themeToggle.textContent = currentTheme === 'light' ? '深色' : '亮色';
+    themeToggle.addEventListener('click', () => {
+      const newTheme = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('swc_theme', newTheme);
+      themeToggle.textContent = newTheme === 'light' ? '深色' : '亮色';
+    });
+
+    // 全局 UI 元素
+    const globalStart = document.getElementById('globalStartBtn');
+    const globalStop = document.getElementById('globalStopBtn');
+    const globalStatus = document.getElementById('globalStatus');
+    const monitorStatus = document.getElementById('monitorStatus');
+    const monitorTimer = document.getElementById('monitorTimer');
+    const monitorCpuThreads = document.getElementById('monitorCpuThreads');
+    const monitorGpuRes = document.getElementById('monitorGpuRes');
+    const monitorGpuFps = document.getElementById('monitorGpuFps');
+    const monitorMemChunks = document.getElementById('monitorMemChunks');
+    const monitorMemSpeed = document.getElementById('monitorMemSpeed');
+    const monitorMemAvgSpeed = document.getElementById('monitorMemAvgSpeed');
+    const monitorCpuCurSpeed = document.getElementById('monitorCpuCurSpeed');
+    const monitorCpuCurUnit = document.getElementById('monitorCpuCurUnit');
+    const monitorCpuAvgSpeed = document.getElementById('monitorCpuAvgSpeed');
+    const monitorCpuAvgUnit = document.getElementById('monitorCpuAvgUnit');
+    const monitorCpuCurFreq = document.getElementById('monitorCpuCurFreq');
+    const monitorCpuAvgFreq = document.getElementById('monitorCpuAvgFreq');
+    const monitorMemTotal = document.getElementById('monitorMemTotal');
+    const canvas = document.getElementById('mainCanvas');
+    const webglBadge = document.getElementById('webglBadge');
+
+    // 模块状态
+    const modules = {
+      cpu: { active: false, start: null, stop: null },
+      gpu: { active: false, start: null, stop: null },
+      mem: { active: false, start: null, stop: null }
+    };
+
+    let globalRunning = false;
+    let globalStartTime = null;
+    let globalTimerInterval = null;
+
+    function updateGlobalTimer() {
+      if (globalRunning && globalStartTime) {
+        const elapsed = (Date.now() - globalStartTime) / 1000;
+        const m = Math.floor(elapsed / 60).toString().padStart(2, '0');
+        const s = Math.floor(elapsed % 60).toString().padStart(2, '0');
+        monitorTimer.textContent = `${m}:${s}`;
+      } else {
+        monitorTimer.textContent = '00:00';
+      }
+    }
+
+    function startGlobalTimer() {
+      if (globalTimerInterval) clearInterval(globalTimerInterval);
+      globalStartTime = Date.now();
+      updateGlobalTimer();
+      globalTimerInterval = setInterval(updateGlobalTimer, 200);
+    }
+
+    function stopGlobalTimer() {
+      if (globalTimerInterval) { clearInterval(globalTimerInterval); globalTimerInterval = null; }
+      globalStartTime = null;
+      monitorTimer.textContent = '00:00';
+    }
+
+    function updateGlobalUI() {
+      const cpuRun = modules.cpu.active;
+      const gpuRun = modules.gpu.active;
+      const memRun = modules.mem.active;
+      const anyRunning = cpuRun || gpuRun || memRun;
+      const allRunning = cpuRun && gpuRun && memRun;
+      globalStart.disabled = allRunning;
+      globalStop.disabled = !anyRunning;
+      globalStatus.textContent = anyRunning ? (allRunning ? '全部运行中' : '部分运行中') : '就绪';
+      monitorStatus.textContent = anyRunning ? '满载中' : '空闲';
+      globalRunning = anyRunning;
+      if (!anyRunning) stopGlobalTimer();
+      else if (!globalStartTime) startGlobalTimer();
+    }
+
+    async function globalStartAction() {
+      if (modules.cpu.active || modules.gpu.active || modules.mem.active) return;
+      if (modules.cpu.start) modules.cpu.start();
+      if (modules.mem.start) {
+        try {
+          await modules.mem.start();
+        } catch (e) {
+          console.error('内存启动失败', e);
+          alert('内存分配失败，请减少容量');
+          modules.mem.stop();
+        }
+      }
+      if (modules.gpu.start) modules.gpu.start();
+    }
+
+    function globalStopAction() {
+      if (modules.cpu.stop) modules.cpu.stop();
+      if (modules.gpu.stop) modules.gpu.stop();
+      if (modules.mem.stop) modules.mem.stop();
+    }
+
+    globalStart.addEventListener('click', globalStartAction);
+    globalStop.addEventListener('click', globalStopAction);
+
+    // ----- 1. CPU 模块 -----
+    (function initCPU() {
+      const threadSlider = document.getElementById('cpuThreadSlider');
+      const threadValue = document.getElementById('cpuThreadValue');
+      const coreHint = document.getElementById('cpuCoreHint');
+      const archHint = document.getElementById('cpuArchHint');
+
+      const hardwareCores = navigator.hardwareConcurrency || 4;
+      coreHint.textContent = hardwareCores;
+      threadSlider.max = 32;
+      threadSlider.value = Math.min(hardwareCores, 8);
+      threadValue.textContent = threadSlider.value;
+
+      const ua = navigator.userAgent;
+      let arch = 'unknown';
+      if (/arm|aarch64|Android|iPad|iPhone|iPod/i.test(ua) || /arm/i.test(navigator.platform)) arch = 'ARM';
+      else if (/Win64|Win32|Windows|Intel|AMD64|x86_64/i.test(ua) || /Win/i.test(navigator.platform)) arch = 'x86';
+      else if (/Mac/i.test(navigator.platform) && !/iPhone|iPad/i.test(ua)) arch = 'x86';
+      archHint.textContent = arch;
+      const CYCLES_PER_OP = arch === 'ARM' ? 400000 : (arch === 'x86' ? 250000 : 350000);
+
+      let workers = [];
+      let isRunning = false;
+      let startTime = null;
+      let uiInterval = null;
+      let totalOps = 0;
+      let lastTotalOps = 0;
+      let lastUIUpdateTime = 0;
+
+      function formatOpsWithUnit(ops) {
+        let value, unit;
+        if (ops >= 1e9) { value = ops / 1e9; unit = 'G'; }
+        else if (ops >= 1e6) { value = ops / 1e6; unit = 'M'; }
+        else if (ops >= 1e3) { value = ops / 1e3; unit = 'K'; }
+        else { value = ops; unit = ''; }
+        return { value: value.toFixed(ops >= 1e3 ? 2 : 0), unit };
+      }
+
+      function updateUI() {
+        if (!isRunning) return;
+        const now = Date.now();
+        const elapsed = (now - lastUIUpdateTime) / 1000;
+        const currentOps = totalOps - lastTotalOps;
+        const currentSpeed = elapsed > 0 ? currentOps / elapsed : 0;
+        const totalElapsed = startTime ? (now - startTime) / 1000 : 0;
+        const avgSpeed = totalElapsed > 0 ? totalOps / totalElapsed : 0;
+
+        const cur = formatOpsWithUnit(currentSpeed);
+        monitorCpuCurSpeed.textContent = cur.value;
+        monitorCpuCurUnit.textContent = cur.unit ? cur.unit + ' ' : '';
+        const avg = formatOpsWithUnit(avgSpeed);
+        monitorCpuAvgSpeed.textContent = avg.value;
+        monitorCpuAvgUnit.textContent = avg.unit ? avg.unit + ' ' : '';
+
+        monitorCpuCurFreq.textContent = ((currentSpeed * CYCLES_PER_OP) / 1e9).toFixed(3);
+        monitorCpuAvgFreq.textContent = ((avgSpeed * CYCLES_PER_OP) / 1e9).toFixed(3);
+        monitorCpuThreads.textContent = workers.length;
+
+        lastTotalOps = totalOps;
+        lastUIUpdateTime = now;
+      }
+
+      function startUIUpdates() {
+        totalOps = 0; lastTotalOps = 0; lastUIUpdateTime = Date.now();
+        if (uiInterval) clearInterval(uiInterval);
+        uiInterval = setInterval(updateUI, 500);
+      }
+
+      function stopUIUpdates() {
+        if (uiInterval) { clearInterval(uiInterval); uiInterval = null; }
+        monitorCpuCurSpeed.textContent = '0'; monitorCpuCurUnit.textContent = '';
+        monitorCpuAvgSpeed.textContent = '0'; monitorCpuAvgUnit.textContent = '';
+        monitorCpuCurFreq.textContent = '0.000'; monitorCpuAvgFreq.textContent = '0.000';
+        monitorCpuThreads.textContent = '0';
+      }
+
+      function terminateAllWorkers() {
+        workers.forEach(w => { try { w.terminate(); } catch(e) {} });
+        workers = [];
+      }
+
+      function createWorker() {
+        const workerScript = `
+          let iteration = 0; const REPORT = 80; const size = 1024;
+          let arr1 = new Float64Array(size), arr2 = new Float64Array(size), arr3 = new Float64Array(size);
+          for (let i=0; i<size; i++) { arr1[i]=Math.random()*1000; arr2[i]=Math.random()*1000; }
+          function intense(){
+            let dot=0; for(let i=0;i<size;i++) dot+=arr1[i]*arr2[i];
+            let trig=0; for(let i=0;i<2000;i++){ trig+=Math.sin(i*0.017)*Math.cos(i*0.013)+Math.tan(i*0.007); trig+=Math.exp(Math.log(Math.abs(trig)+1))*0.001; }
+            for(let i=0;i<size;i++) arr3[i]=arr1[i]*1.5+arr2[i]*0.7+dot*0.0001+trig*0.000001;
+            let intS=0; for(let i=0;i<5000;i++){ intS+=(i*7919)^(i<<2); intS=intS>>>0; }
+            arr1[0]=(arr1[0]+dot*1e-9+trig*1e-12+intS*1e-9)%1000;
+            arr2[0]=(arr2[0]+arr3[0]*0.0001)%1000;
+          }
+          while(true){ intense(); iteration++; if(iteration>=REPORT){ self.postMessage({ops:iteration}); iteration=0; } }
+        `;
+        const blob = new Blob([workerScript], {type:'application/javascript'});
+        const url = URL.createObjectURL(blob);
+        const worker = new Worker(url);
+        worker.onmessage = (e) => { if(e.data?.ops) totalOps += e.data.ops; };
+        worker.onerror = (e) => { const idx = workers.indexOf(worker); if(idx>-1) workers.splice(idx,1); monitorCpuThreads.textContent = workers.length; };
+        URL.revokeObjectURL(url);
+        return worker;
+      }
+
+      function start() {
+        if (isRunning) return;
+        terminateAllWorkers();
+        const cnt = parseInt(threadSlider.value, 10);
+        for (let i=0; i<cnt; i++) { try { workers.push(createWorker()); } catch(e) {} }
+        isRunning = true;
+        startTime = Date.now();
+        startUIUpdates();
+        modules.cpu.active = true;
+        updateGlobalUI();
+      }
+
+      function stop() {
+        if (!isRunning) return;
+        terminateAllWorkers();
+        isRunning = false;
+        stopUIUpdates();
+        modules.cpu.active = false;
+        updateGlobalUI();
+      }
+
+      threadSlider.addEventListener('input', () => threadValue.textContent = threadSlider.value);
+      modules.cpu.start = start;
+      modules.cpu.stop = stop;
+      window.addEventListener('beforeunload', () => terminateAllWorkers());
+    })();
+
+    // ----- 2. GPU 模块 (支持4K) -----
+    (function initGPU() {
+      const infoBadge = document.getElementById('gpuInfoBadge');
+      const intensitySlider = document.getElementById('gpuIntensitySlider');
+      const intensityVal = document.getElementById('gpuIntensityVal');
+      const resSelect = document.getElementById('gpuResolutionSelect');
+      const msaaSelect = document.getElementById('gpuMsaaSelect');
+
+      let gl = null, program = null, uniforms = {}, noiseTex = null;
+      let isRunning = false, animFrame = null;
+      let frameCount = 0, lastFpsUpdate = performance.now();
+
+      function applyResolution() {
+        const [w, h] = resSelect.value.split('x').map(Number);
+        canvas.width = w; canvas.height = h;
+        if (gl) gl.viewport(0, 0, w, h);
+        monitorGpuRes.textContent = `${w}x${h}`;
+      }
+
+      function createNoiseTex() {
+        const size = 512, data = new Uint8Array(size*size*4);
+        for (let i=0; i<data.length; i+=4) { data[i]=Math.random()*256; data[i+1]=Math.random()*256; data[i+2]=Math.random()*256; data[i+3]=255; }
+        noiseTex = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, noiseTex);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, size, size, 0, gl.RGBA, gl.UNSIGNED_BYTE, data);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+      }
+
+      function compileShaders() {
+        const vs = `#version 300 es\nin vec2 aPos; void main(){ gl_Position=vec4(aPos,0,1); }`;
+        const fs = `#version 300 es\nprecision highp float;\nuniform vec2 res;\nuniform float time;\nuniform float intensity;\nuniform sampler2D noiseTex;\nout vec4 color;\nfloat hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }\nfloat noise(vec2 p){ vec2 i=floor(p),f=fract(p); vec2 u=f*f*(3.0-2.0*f); return mix(mix(hash(i),hash(i+vec2(1,0)),u.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x),u.y); }\nfloat fbm(vec2 p){ float s=0.0,a=0.6,f=2.0; for(int i=0;i<7;i++){ s+=a*noise(p*f); a*=0.5; f*=2.0; } return s; }\nvoid main(){ vec2 uv=gl_FragCoord.xy/res; vec2 p=uv*4.0+vec2(time*0.05); vec4 n=texture(noiseTex,uv*2.0+time*0.01); float v=0.0; int iter=int(intensity); for(int i=0;i<100;i++){ if(i>=iter) break; vec2 off=vec2(sin(float(i)*0.4+time*0.15),cos(float(i)*0.3))*0.008; v+=fbm(p+off)*0.8; v+=sin(p.x*5.0+float(i)*0.5)*cos(p.y*6.0)*0.3; v+=tan(p.x*2.0)*0.1; } v=fract(v*0.2); v=mix(v,v*n.r,0.3); float r=sin(v*15.0+time*1.2)*0.8+0.5; float g=cos(v*12.0-time*0.9)*0.8+0.5; float b=sin(v*18.0+time*1.5)*0.9+0.4; color=vec4(r,g,b,1); }`;
+        const vShader = gl.createShader(gl.VERTEX_SHADER); gl.shaderSource(vShader, vs); gl.compileShader(vShader);
+        const fShader = gl.createShader(gl.FRAGMENT_SHADER); gl.shaderSource(fShader, fs); gl.compileShader(fShader);
+        if (!gl.getShaderParameter(vShader, gl.COMPILE_STATUS) || !gl.getShaderParameter(fShader, gl.COMPILE_STATUS)) return false;
+        program = gl.createProgram(); gl.attachShader(program, vShader); gl.attachShader(program, fShader); gl.linkProgram(program);
+        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return false;
+        gl.useProgram(program);
+        uniforms.res = gl.getUniformLocation(program, 'res');
+        uniforms.time = gl.getUniformLocation(program, 'time');
+        uniforms.intensity = gl.getUniformLocation(program, 'intensity');
+        uniforms.noiseTex = gl.getUniformLocation(program, 'noiseTex');
+        gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, noiseTex); gl.uniform1i(uniforms.noiseTex, 0);
+        const verts = new Float32Array([-1,-1, 1,-1, -1,1, 1,1]);
+        const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, verts, gl.STATIC_DRAW);
+        const aPos = gl.getAttribLocation(program, 'aPos'); gl.enableVertexAttribArray(aPos); gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+        return true;
+      }
+
+      function initWebGL() {
+        const msaa = parseInt(msaaSelect.value, 10);
+        const opts = { alpha: false, antialias: msaa > 0, powerPreference: 'high-performance' };
+        if (msaa > 0) opts.sampleCount = msaa;
+        gl = canvas.getContext('webgl2', opts) || canvas.getContext('webgl', opts);
+        if (!gl) { infoBadge.textContent = '不支持'; webglBadge.textContent = '不支持'; return false; }
+        webglBadge.textContent = gl instanceof WebGL2RenderingContext ? 'WebGL 2.0' : 'WebGL 1.0';
+        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+        infoBadge.textContent = debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || '未知' : '未知';
+        applyResolution();
+        createNoiseTex();
+        gl.clearColor(0,0,0,1);
+        return compileShaders();
+      }
+
+      function drawScene() {
+        if (!gl || !program) return;
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.uniform2f(uniforms.res, canvas.width, canvas.height);
+        gl.uniform1f(uniforms.time, performance.now() / 1000 % 1000);
+        gl.uniform1f(uniforms.intensity, parseFloat(intensitySlider.value));
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      }
+
+      function renderLoop() {
+        if (!isRunning) return;
+        drawScene();
+        animFrame = requestAnimationFrame(renderLoop);
+      }
+
+      function updateFPS() {
+        frameCount++;
+        const now = performance.now();
+        if (now - lastFpsUpdate >= 1000) {
+          monitorGpuFps.textContent = Math.round((frameCount * 1000) / (now - lastFpsUpdate));
+          frameCount = 0;
+          lastFpsUpdate = now;
+        }
+        requestAnimationFrame(updateFPS);
+      }
+
+      function start() {
+        if (!gl || isRunning) return;
+        isRunning = true;
+        renderLoop();
+        modules.gpu.active = true;
+        updateGlobalUI();
+      }
+
+      function stop() {
+        if (!isRunning) return;
+        isRunning = false;
+        if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
+        if (gl) gl.clear(gl.COLOR_BUFFER_BIT);
+        modules.gpu.active = false;
+        updateGlobalUI();
+      }
+
+      async function onSettingsChange() {
+        const was = isRunning;
+        if (was) stop();
+        applyResolution();
+        initWebGL();
+        if (was) start(); else if (gl) drawScene();
+      }
+
+      intensitySlider.addEventListener('input', () => intensityVal.textContent = intensitySlider.value);
+      resSelect.addEventListener('change', onSettingsChange);
+      msaaSelect.addEventListener('change', onSettingsChange);
+      if (initWebGL()) drawScene();
+      requestAnimationFrame(updateFPS);
+      intensityVal.textContent = intensitySlider.value;
+      modules.gpu.start = start;
+      modules.gpu.stop = stop;
+    })();
+
+    // ----- 3. 内存模块（无延迟，同步分配，步长限制）-----
+    (function initMEM() {
+      const gbSlider = document.getElementById('memGbSlider');
+      const gbValue = document.getElementById('memGbValue');
+      const workersSlider = document.getElementById('memWorkersSlider');
+      const workersValue = document.getElementById('memWorkersValue');
+      const blockSelect = document.getElementById('memBlockSelect');
+      const viewSelect = document.getElementById('memViewSelect');
+      const deviceMemBadge = document.getElementById('memDeviceMemBadge');
+      const maxMemHint = document.getElementById('memMaxHint');
+
+      const cores = navigator.hardwareConcurrency || 8;
+      const deviceMem = navigator.deviceMemory || 4;
+      deviceMemBadge.textContent = deviceMem;
+      let maxMem = Math.min(deviceMem * 1.5, 64);
+      if (isNaN(maxMem) || maxMem < 0.5) maxMem = 16;
+      maxMem = Math.round(maxMem * 10) / 10;
+      gbSlider.max = maxMem;
+      maxMemHint.textContent = maxMem.toFixed(1);
+      gbSlider.value = Math.min(2.0, maxMem);
+      gbValue.textContent = parseFloat(gbSlider.value).toFixed(1);
+
+      const maxWorkers = Math.min(64, cores * 4);
+      workersSlider.max = maxWorkers;
+      workersSlider.value = Math.min(8, maxWorkers);
+      workersValue.textContent = workersSlider.value;
+
+      const RAW_CHUNK = 0.1 * 1024 * 1024 * 1024; // 100 MB per chunk
+      const CHUNK_SIZE = Math.floor(RAW_CHUNK / 4) * 4;
+
+      let memoryBlocks = [], workers = [], isRunning = false, statsInterval = null;
+      let totalBytes = 0, lastTotal = 0, lastUpdate = 0, firstWrite = null;
+
+      function updateStats() {
+        if (!isRunning) return;
+        const now = Date.now();
+        const elapsed = (now - lastUpdate) / 1000;
+        if (elapsed >= 0.2) {
+          const bytes = totalBytes - lastTotal;
+          const gb = bytes / (1024**3);
+          monitorMemSpeed.textContent = (gb / elapsed).toFixed(2);
+          monitorMemTotal.textContent = (totalBytes / (1024**3)).toFixed(3);
+          if (firstWrite && totalBytes > 0) {
+            const avgElapsed = (now - firstWrite) / 1000;
+            monitorMemAvgSpeed.textContent = ((totalBytes / (1024**3)) / avgElapsed).toFixed(3);
+          }
+          lastTotal = totalBytes;
+          lastUpdate = now;
+        }
+        monitorMemChunks.textContent = memoryBlocks.length;
+      }
+
+      function startMonitoring() {
+        totalBytes = 0; lastTotal = 0; lastUpdate = Date.now(); firstWrite = null;
+        monitorMemSpeed.textContent = '0.00'; monitorMemAvgSpeed.textContent = '0.000'; monitorMemTotal.textContent = '0.000';
+        if (statsInterval) clearInterval(statsInterval);
+        statsInterval = setInterval(updateStats, 200);
+      }
+
+      function stopMonitoring() {
+        if (statsInterval) { clearInterval(statsInterval); statsInterval = null; }
+        monitorMemSpeed.textContent = '0.00'; monitorMemAvgSpeed.textContent = '0.000'; monitorMemTotal.textContent = '0.000';
+      }
+
+      function fullStop() {
+        isRunning = false;
+        stopMonitoring();
+        workers.forEach(w => { try { w.postMessage({type:'stop'}); w.terminate(); } catch(e) {} });
+        workers = []; memoryBlocks = [];
+        monitorMemChunks.textContent = '0';
+        modules.mem.active = false;
+        updateGlobalUI();
+      }
+
+      function createWorker(buffers, blockBytes, viewType) {
+        const isUint32 = viewType === 'uint32';
+        const MAX_STEP = 4096;
+        let stepElements = isUint32 ? Math.floor(blockBytes / 4) : blockBytes;
+        if (stepElements > MAX_STEP) stepElements = MAX_STEP;
+        const workerCode = `
+          const STEP = ${stepElements};
+          const IS_UINT32 = ${isUint32};
+          let running = true;
+          let views = [];
+          let roundBytes = 0;
+          self.onmessage = function(e) {
+            if (e.data.type === 'init') {
+              const buffers = e.data.buffers;
+              if (!buffers || buffers.length === 0) return;
+              if (IS_UINT32) {
+                for (const buf of buffers) { views.push(new Uint32Array(buf)); roundBytes += buf.byteLength; }
+              } else {
+                for (const buf of buffers) { views.push(new Uint8Array(buf)); roundBytes += buf.byteLength; }
+              }
+              writeLoop();
+            } else if (e.data.type === 'stop') {
+              running = false;
+            }
+          };
+          function writeLoop() {
+            while (running) {
+              for (const view of views) {
+                const len = view.length;
+                if (IS_UINT32) {
+                  for (let i = 0; i < len; i += STEP) {
+                    const end = Math.min(i + STEP, len);
+                    view.subarray(i, end).fill(Math.floor(Math.random() * 0x100000000));
+                  }
+                } else {
+                  for (let i = 0; i < len; i += STEP) {
+                    const end = Math.min(i + STEP, len);
+                    view.subarray(i, end).fill(Math.floor(Math.random() * 256));
+                  }
+                }
+              }
+              self.postMessage({ type: 'round', bytes: roundBytes });
+            }
+          }
+        `;
+        const blob = new Blob([workerCode], { type: 'application/javascript' });
+        const worker = new Worker(URL.createObjectURL(blob));
+        worker.onmessage = (e) => {
+          if (e.data.type === 'round') {
+            if (!firstWrite) firstWrite = Date.now();
+            totalBytes += e.data.bytes;
+          }
+        };
+        worker.postMessage({ type: 'init', buffers: buffers }, buffers);
+        return worker;
+      }
+
+      async function start() {
+        if (isRunning) return;
+        fullStop();
+
+        const gb = parseFloat(gbSlider.value);
+        const blockCount = Math.round(gb / 0.1);
+        const workerCount = parseInt(workersSlider.value, 10);
+        let blockMB = parseInt(blockSelect.value, 10);
+        let blockBytes = blockMB * 1024 * 1024;
+        const viewType = viewSelect.value;
+        if (viewType === 'uint32') blockBytes = Math.floor(blockBytes / 4) * 4;
+
+        try {
+          memoryBlocks = [];
+          for (let i = 0; i < blockCount; i++) {
+            memoryBlocks.push(new ArrayBuffer(CHUNK_SIZE));
+            monitorMemChunks.textContent = memoryBlocks.length;
+          }
+        } catch (e) {
+          fullStop();
+          alert('内存分配失败，请减少容量');
+          throw e;
+        }
+
+        if (memoryBlocks.length === 0) {
+          fullStop();
+          alert('内存分配失败');
+          return;
+        }
+
+        const perWorker = Math.floor(memoryBlocks.length / workerCount);
+        const rem = memoryBlocks.length % workerCount;
+        let idx = 0;
+        for (let i = 0; i < workerCount; i++) {
+          const cnt = perWorker + (i < rem ? 1 : 0);
+          if (cnt > 0) {
+            workers.push(createWorker(memoryBlocks.slice(idx, idx + cnt), blockBytes, viewType));
+            idx += cnt;
+          }
+        }
+
+        isRunning = true;
+        modules.mem.active = true;
+        startMonitoring();
+        updateGlobalUI();
+      }
+
+      function stop() {
+        if (isRunning) fullStop();
+      }
+
+      gbSlider.addEventListener('input', () => {
+        gbValue.textContent = parseFloat(gbSlider.value).toFixed(1);
+      });
+      workersSlider.addEventListener('input', () => {
+        workersValue.textContent = workersSlider.value;
+      });
+
+      modules.mem.start = start;
+      modules.mem.stop = stop;
+      window.addEventListener('beforeunload', () => { if (isRunning) fullStop(); });
+    })();
+
+    updateGlobalUI();
+  })();
+</script>
+</body>
+</html>

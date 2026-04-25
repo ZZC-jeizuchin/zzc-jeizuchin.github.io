@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>GPU 压力测试 · WebGL2 · SwCTools</title>
+  <style>
+    :root {
+      --bg-body: #e8edf2;
+      --panel-bg: rgba(255, 255, 255, 0.85);
+      --panel-border: #bdd1e6;
+      --title-color: #1e4b6e;
+      --badge-bg: #d0e2f0;
+      --badge-color: #2c6182;
+      --cat-btn-bg: #d9e8f4;
+      --cat-btn-border: #adc7e0;
+      --cat-btn-color: #1a4059;
+      --cat-btn-hover-bg: #c2d8ed;
+      --jump-row-bg: #e7f0f9;
+      --input-border: #b3cce2;
+      --go-btn-bg: #4f7f9e;
+      --go-btn-hover-bg: #3a6b8c;
+      --tool-btn-bg: #cddef0;
+      --tool-btn-border: #a3bed8;
+      --tool-btn-color: #1a4765;
+      --device-item-bg: #eaf2fc;
+      --device-label-color: #1e4b6e;
+      --device-value-color: #0d3450;
+      --text-color: #173e58;
+      --corner-text-color: #3a6a8e;
+      --fps-bg: rgba(255, 255, 255, 0.6);
+      --stress-btn-bg: #4f7f9e;
+      --stress-btn-shadow: #2a4a6a;
+    }
+
+    [data-theme="dark"] {
+      --bg-body: #0a0f14;
+      --panel-bg: rgba(13, 27, 42, 0.9);
+      --panel-border: #1e3a5a;
+      --title-color: #a0c4e8;
+      --badge-bg: #1a3a5c;
+      --badge-color: #b0d0f0;
+      --cat-btn-bg: #1e3a5a;
+      --cat-btn-border: #2a5a8a;
+      --cat-btn-color: #c0d8f0;
+      --cat-btn-hover-bg: #2a5a8a;
+      --jump-row-bg: #122a3e;
+      --input-border: #2a5a8a;
+      --go-btn-bg: #2a6a9e;
+      --go-btn-hover-bg: #1a4a7a;
+      --tool-btn-bg: #1e3a5a;
+      --tool-btn-border: #2a5a8a;
+      --tool-btn-color: #c0d8f0;
+      --device-item-bg: #122a3e;
+      --device-label-color: #a0c4e8;
+      --device-value-color: #d0e0f0;
+      --text-color: #c0d8f0;
+      --corner-text-color: #7a9ab0;
+      --fps-bg: rgba(0, 0, 0, 0.5);
+      --stress-btn-bg: #2a6a9e;
+      --stress-btn-shadow: #1a3a5a;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+    body { background: var(--bg-body); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 12px; position: relative; }
+
+    .corner-tl { position: fixed; top: 12px; left: 16px; font-size: 0.75rem; color: var(--corner-text-color); opacity: 0.8; z-index: 3000; pointer-events: none; }
+    .corner-tr { position: fixed; top: 12px; right: 20px; font-size: 0.75rem; color: var(--corner-text-color); opacity: 0.8; z-index: 3000; pointer-events: none; background: var(--fps-bg); padding: 4px 12px; border-radius: 24px; border: 1px solid var(--panel-border); }
+    .corner-br { position: fixed; bottom: 12px; right: 20px; font-size: 0.75rem; color: var(--corner-text-color); opacity: 0.8; z-index: 3000; pointer-events: none; }
+    .theme-toggle {
+      position: fixed; bottom: 12px; left: 16px; font-size: 0.9rem; background: var(--cat-btn-bg);
+      border: 1px solid var(--panel-border); color: var(--corner-text-color); padding: 5px 14px;
+      border-radius: 32px; cursor: pointer; opacity: 0.85; transition: 0.2s; z-index: 3000;
+      font-weight: 500; -webkit-tap-highlight-color: transparent;
+    }
+    .theme-toggle:hover { opacity: 1; background: var(--cat-btn-hover-bg); }
+
+    .main-panel { max-width: 760px; width: 100%; background: var(--panel-bg); border-radius: 28px; box-shadow: 0 16px 30px -8px rgba(30, 65, 90, 0.18); border: 1px solid var(--panel-border); padding: 26px 28px 32px; }
+    .title-section { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+    .title-section h1 { font-weight: 550; font-size: 2rem; color: var(--title-color); }
+    .badge { color: var(--badge-color); background: var(--badge-bg); padding: 6px 18px; border-radius: 40px; font-size: 0.9rem; border: 1px solid var(--cat-btn-border); }
+    .back-btn {
+      display: inline-block; background: var(--cat-btn-bg); border: 1px solid var(--cat-btn-border);
+      color: var(--cat-btn-color); padding: 8px 18px; border-radius: 36px; font-weight: 520;
+      text-decoration: none; transition: 0.15s; margin: 8px 0 16px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .back-btn:hover { background: var(--cat-btn-hover-bg); }
+
+    .gpu-info-card { background: var(--device-item-bg); border-radius: 20px; padding: 12px 18px; margin-bottom: 14px; border: 1px solid var(--panel-border); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .gpu-label { color: var(--device-label-color); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; }
+    .gpu-value { color: var(--title-color); font-family: monospace; font-size: 0.9rem; word-break: break-word; }
+
+    .control-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-bottom: 12px; }
+    .slider-container { flex: 2 1 180px; }
+    .res-container { flex: 1 1 140px; }
+    .aa-container { flex: 1 1 140px; }
+    .res-container label, .aa-container label { display: block; font-size: 0.8rem; font-weight: 500; color: var(--device-label-color); margin-bottom: 4px; text-transform: uppercase; }
+    .res-select, .aa-select { width: 100%; padding: 10px 12px; border-radius: 40px; border: 1.5px solid var(--input-border); background: var(--panel-bg); color: var(--text-color); font-size: 0.9rem; outline: none; cursor: pointer; }
+
+    .slider-header { display: flex; justify-content: space-between; margin-bottom: 4px; font-weight: 500; color: var(--text-color); }
+    .slider-header span { background: var(--jump-row-bg); padding: 4px 14px; border-radius: 32px; font-family: monospace; border: 1px solid var(--panel-border); }
+    input[type=range] { width: 100%; margin: 4px 0; -webkit-appearance: none; background: transparent; }
+    input[type=range]::-webkit-slider-runnable-track { height: 6px; background: var(--jump-row-bg); border-radius: 8px; border: 1px solid var(--panel-border); }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 20px; width: 20px; border-radius: 20px; background: var(--go-btn-bg); margin-top: -8px; box-shadow: 0 2px 6px rgba(30,75,110,0.25); border: 2px solid #d0e4f5; cursor: grab; }
+
+    .stress-btn-group { display: flex; gap: 12px; margin: 16px 0 18px; }
+    .nav-btn {
+      background: var(--stress-btn-bg); border: none; color: white; padding: 16px 20px;
+      border-radius: 60px; font-weight: 650; font-size: 1.3rem; cursor: pointer; flex: 1;
+      text-align: center; transition: all 0.15s; box-shadow: 0 6px 0 var(--stress-btn-shadow);
+      text-transform: uppercase; letter-spacing: 1px; -webkit-tap-highlight-color: transparent;
+    }
+    .nav-btn.secondary {
+      background: var(--tool-btn-bg); border: 1px solid var(--tool-btn-border);
+      color: var(--tool-btn-color); box-shadow: 0 5px 0 #8a9eb0;
+    }
+    .nav-btn:active { transform: translateY(3px); box-shadow: 0 3px 0 var(--stress-btn-shadow); }
+    .nav-btn:disabled { opacity: 0.5; transform: none; box-shadow: 0 6px 0 #4a5a6a; background: #6a7a8a; cursor: not-allowed; }
+
+    .canvas-wrapper { background: #0b1219; border-radius: 24px; padding: 6px; margin: 8px 0 6px; border: 2px solid var(--panel-border); }
+    canvas { display: block; width: 100%; height: auto; aspect-ratio: 16/9; border-radius: 18px; background: black; cursor: pointer; }
+
+    .status-panel { background: var(--device-item-bg); border-radius: 20px; padding: 14px 20px; margin-top: 6px; border: 1px solid var(--panel-border); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+    .status-item { display: flex; align-items: baseline; gap: 6px; }
+    .status-label { color: var(--device-label-color); font-size: 0.8rem; text-transform: uppercase; }
+    .status-value { font-weight: 700; font-size: 1.3rem; font-family: monospace; color: var(--title-color); }
+    #resolutionDisplay { font-size: 1.1rem; }
+
+    .warning-note { margin-top: 14px; font-size: 0.8rem; color: #cc7f2a; background: rgba(255, 140, 0, 0.06); padding: 10px 16px; border-radius: 20px; border-left: 5px solid var(--stress-btn-bg); }
+    .hint-text { font-size: 0.75rem; color: var(--corner-text-color); margin-top: 4px; text-align: right; }
+
+    /* 图表容器 */
+    .chart-container { margin-top: 18px; }
+    .chart-title { font-size: 0.8rem; color: var(--device-label-color); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+    #fpsChartCanvas {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 6 / 1;          /* 固定宽高比 6:1，防止压缩变形 */
+      background: var(--device-item-bg);
+      border-radius: 18px;
+      border: 1px solid var(--panel-border);
+      display: block;
+    }
+
+    @media (max-width: 600px) { .control-row { flex-direction: column; align-items: stretch; } .main-panel { padding: 14px 16px 20px; } .stress-btn-group { flex-direction: column; } }
+  </style>
+</head>
+<body>
+<div class="corner-tl">不自由毋宁死 · 不自由毋寧死 · Give me liberty or give me death · 自由か、死か</div>
+<div class="corner-tr" id="fpsDisplay">FPS: --</div>
+<div class="corner-br">made by ZZC-jeizuchin, Github</div>
+<button class="theme-toggle" id="themeToggle" aria-label="切换深色模式">深色</button>
+
+<div class="main-panel">
+  <div class="title-section">
+    <h1>GPU 压力测试 · WebGL2</h1>
+    <span class="badge" id="webglBadge">WebGL ?</span>
+  </div>
+  <a href="index.html" class="back-btn">← 返回主站</a>
+
+  <div class="gpu-info-card">
+    <span class="gpu-label">GPU 渲染器:</span>
+    <span class="gpu-value" id="gpuRenderer">检测中…</span>
+  </div>
+
+  <div class="control-row">
+    <div class="slider-container">
+      <div class="slider-header"><label>压力档位 (1-100)</label><span id="intensityValue">20</span></div>
+      <input type="range" id="intensitySlider" min="1" max="100" value="20" step="1">
+    </div>
+    <div class="res-container">
+      <label>渲染分辨率 (16:9)</label>
+      <select id="resolutionSelect" class="res-select">
+        <option value="256x144">256x144 (144p)</option><option value="320x180">320x180 (180p)</option><option value="426x240">426x240 (240p)</option><option value="640x360">640x360 (360p)</option><option value="854x480">854x480 (480p)</option><option value="1280x720" selected>1280x720 (720p)</option><option value="1920x1080">1920x1080 (1080p)</option><option value="2560x1440">2560x1440 (2K)</option><option value="2880x1620">2880x1620 (3K)</option><option value="3200x1800">3200x1800 (3.2K)</option><option value="3840x2160">3840x2160 (4K)</option>
+      </select>
+    </div>
+    <div class="aa-container">
+      <label>MSAA 采样数</label>
+      <select id="msaaSelect" class="aa-select">
+        <option value="0">关闭</option><option value="2">2x MSAA</option><option value="4">4x MSAA</option><option value="8" selected>8x MSAA</option>
+      </select>
+    </div>
+  </div>
+  <div class="hint-text">默认8x MSAA · 档位≥20推荐 · 高分辨率+高档位发热显著</div>
+
+  <div class="canvas-wrapper"><canvas id="glCanvas" width="1280" height="720"></canvas></div>
+
+  <div class="stress-btn-group">
+    <button class="nav-btn" id="startBtn">开始</button>
+    <button class="nav-btn secondary" id="stopBtn" disabled>停止</button>
+  </div>
+
+  <div class="status-panel">
+    <div class="status-item"><span class="status-label">状态</span><span class="status-value" id="statusText">空闲</span></div>
+    <div class="status-item"><span class="status-label">运行时长</span><span class="status-value" id="timerDisplay">00:00</span></div>
+    <div class="status-item"><span class="status-label">分辨率</span><span class="status-value" id="resolutionDisplay">1280x720</span></div>
+  </div>
+
+  <!-- FPS 历史图表区域 -->
+  <div class="chart-container">
+    <div class="chart-title">📊 FPS 趋势 (最近60秒)</div>
+    <canvas id="fpsChartCanvas" width="600" height="100"></canvas>
+  </div>
+
+  <div class="warning-note">学习机WebGL2高负载模式 · 发热效果显著 · 建议从720p+20档+8x MSAA开始</div>
+</div>
+
+<script>
+  (function(){
+    "use strict";
+    // ---------- 主题切换 ----------
+    const themeToggle = document.getElementById('themeToggle');
+    const currentTheme = localStorage.getItem('swc_theme') || 'light';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    themeToggle.textContent = currentTheme === 'light' ? '深色' : '亮色';
+    themeToggle.addEventListener('click', () => {
+      const newTheme = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('swc_theme', newTheme);
+      themeToggle.textContent = newTheme === 'light' ? '深色' : '亮色';
+      drawChart(); // 主题切换重绘图表以适配新颜色
+    });
+
+    // ---------- FPS 显示、历史记录与图表 ----------
+    const fpsDisplay = document.getElementById('fpsDisplay');
+    const MAX_HISTORY = 60;                // 记录最近 60 个点（每秒一个）
+    let fpsHistory = new Array(MAX_HISTORY).fill(0);
+    let historyIndex = 0;
+    let frameCount = 0, lastFpsUpdate = performance.now();
+
+    // 图表画布
+    const chartCanvas = document.getElementById('fpsChartCanvas');
+    const chartCtx = chartCanvas.getContext('2d');
+
+    // 最大帧率相关
+    let maxFpsValue = 0;
+    let maxFpsEnabled = false;
+    let maxFpsTimeout = null;
+
+    // 屏幕刷新率估算
+    const frameTimestamps = [];
+    let estimatedRefreshRate = 60; // 默认值
+
+    function estimateRefreshRate(now) {
+      frameTimestamps.push(now);
+      if (frameTimestamps.length > 30) frameTimestamps.shift();
+      if (frameTimestamps.length >= 2) {
+        const avgInterval = (frameTimestamps[frameTimestamps.length-1] - frameTimestamps[0]) / (frameTimestamps.length - 1);
+        if (avgInterval > 0) {
+          const rate = Math.round(1000 / avgInterval);
+          // 映射到常见刷新率
+          const candidates = [60, 90, 120, 144, 165, 180, 240];
+          estimatedRefreshRate = candidates.reduce((a, b) => Math.abs(b - rate) < Math.abs(a - rate) ? b : a);
+        }
+      }
+    }
+
+    function drawChart() {
+      // 同步画布像素尺寸与 CSS 显示尺寸（修复横向压缩问题）
+      const displayWidth = chartCanvas.clientWidth;
+      const displayHeight = chartCanvas.clientHeight;
+      if (displayWidth > 0 && displayHeight > 0) {
+        if (chartCanvas.width !== displayWidth || chartCanvas.height !== displayHeight) {
+          chartCanvas.width = displayWidth;
+          chartCanvas.height = displayHeight;
+        }
+      }
+      
+      const w = chartCanvas.width, h = chartCanvas.height;
+      chartCtx.clearRect(0, 0, w, h);
+      
+      // 从 CSS 变量获取主题颜色
+      const style = getComputedStyle(document.documentElement);
+      const lineColor = style.getPropertyValue('--stress-btn-bg').trim() || '#4f7f9e';
+      const gridColor = style.getPropertyValue('--panel-border').trim() || '#bdd1e6';
+      const textColor = style.getPropertyValue('--text-color').trim() || '#173e58';
+      
+      // 确定 Y 轴最大值：优先取 maxFpsValue，否则用估算刷新率
+      const baseMax = maxFpsValue > 0 ? maxFpsValue : estimatedRefreshRate;
+      const maxFps = Math.max(60, Math.ceil(baseMax * 1.05)); // 留 5% 余量
+      
+      // 绘图内边距：防止文字被裁剪
+      const paddingTop = 10;
+      const paddingBottom = 6;
+      const plotHeight = h - paddingTop - paddingBottom;
+      
+      // 左侧留出空间给刻度标签
+      const leftPadding = Math.min(36, w * 0.12);
+      const graphWidth = w - leftPadding;
+      const stepX = graphWidth / (MAX_HISTORY - 1);
+      
+      // 绘制水平网格线和刻度标签 (1/4, 1/2, 3/4, 1)
+      const levels = [0.25, 0.5, 0.75, 1.0];
+      chartCtx.fillStyle = textColor;
+      chartCtx.font = '500 11px system-ui, monospace';
+      chartCtx.textBaseline = 'middle';
+      chartCtx.textAlign = 'right';
+      
+      levels.forEach(ratio => {
+        const y = paddingTop + plotHeight - (ratio * plotHeight);
+        const value = Math.round(maxFps * ratio);
+        
+        // 网格线
+        chartCtx.beginPath();
+        chartCtx.strokeStyle = gridColor;
+        chartCtx.lineWidth = 0.6;
+        chartCtx.moveTo(leftPadding - 4, y);
+        chartCtx.lineTo(w, y);
+        chartCtx.stroke();
+        
+        // 标签 (靠左放置)
+        chartCtx.fillText(value.toString(), leftPadding - 8, y);
+      });
+      
+      // 绘制数据折线 (X 坐标从 leftPadding 开始)
+      chartCtx.beginPath();
+      chartCtx.strokeStyle = lineColor;
+      chartCtx.lineWidth = 2.2;
+      
+      for (let i = 0; i < MAX_HISTORY; i++) {
+        const idx = (historyIndex + i) % MAX_HISTORY;
+        const fps = fpsHistory[idx] || 0;
+        const x = leftPadding + i * stepX;
+        const y = paddingTop + plotHeight - (fps / maxFps) * plotHeight;
+        if (i === 0) chartCtx.moveTo(x, y);
+        else chartCtx.lineTo(x, y);
+      }
+      chartCtx.stroke();
+      
+      // 右上角显示最大帧率
+      chartCtx.font = 'bold 12px system-ui, monospace';
+      chartCtx.fillStyle = lineColor;
+      chartCtx.textAlign = 'right';
+      chartCtx.fillText(`MAX: ${maxFpsValue > 0 ? maxFpsValue : '--'} fps`, w - 8, paddingTop + 4);
+      
+      // 左下角显示估算刷新率 (可选)
+      chartCtx.font = '500 10px system-ui, monospace';
+      chartCtx.fillStyle = textColor;
+      chartCtx.textAlign = 'left';
+      chartCtx.fillText(`屏幕 ~${estimatedRefreshRate}Hz`, leftPadding, h - paddingBottom);
+    }
+
+    function updateFPS() {
+      frameCount++;
+      const now = performance.now();
+      estimateRefreshRate(now); // 持续估算刷新率
+      
+      if (now - lastFpsUpdate >= 1000) {
+        const fps = Math.round((frameCount * 1000) / (now - lastFpsUpdate));
+        fpsDisplay.textContent = `FPS: ${fps}`;
+        
+        // 记录到历史数组
+        fpsHistory[historyIndex] = fps;
+        historyIndex = (historyIndex + 1) % MAX_HISTORY;
+        
+        // 更新最大帧率（仅在启用时）
+        if (maxFpsEnabled && fps > maxFpsValue) {
+          maxFpsValue = fps;
+        }
+        
+        drawChart();
+        frameCount = 0;
+        lastFpsUpdate = now;
+      }
+      requestAnimationFrame(updateFPS);
+    }
+    requestAnimationFrame(updateFPS);
+
+    // 清空历史（开始测试时调用）
+    function resetFpsHistory() {
+      fpsHistory.fill(0);
+      historyIndex = 0;
+      maxFpsValue = 0;
+      maxFpsEnabled = false;
+      if (maxFpsTimeout) {
+        clearTimeout(maxFpsTimeout);
+        maxFpsTimeout = null;
+      }
+      drawChart();
+    }
+
+    // ---------- WebGL 核心 ----------
+    const webglBadge = document.getElementById('webglBadge'), gpuRendererSpan = document.getElementById('gpuRenderer');
+    const intensitySlider = document.getElementById('intensitySlider'), intensityValue = document.getElementById('intensityValue');
+    const resolutionSelect = document.getElementById('resolutionSelect'), msaaSelect = document.getElementById('msaaSelect');
+    const resolutionDisplay = document.getElementById('resolutionDisplay');
+    const startBtn = document.getElementById('startBtn'), stopBtn = document.getElementById('stopBtn');
+    const statusText = document.getElementById('statusText'), timerDisplay = document.getElementById('timerDisplay');
+    const canvas = document.getElementById('glCanvas');
+
+    let gl = null, program = null, uniforms = {}, animationFrame = null, isRunning = false, startTime = null, timerInterval = null, noiseTexture = null;
+
+    function initWebGL() {
+      const msaaLevel = parseInt(msaaSelect.value,10);
+      const opts = { alpha: false, antialias: msaaLevel>0, powerPreference: 'high-performance', failIfMajorPerformanceCaveat: true };
+      if(msaaLevel>0) opts.sampleCount = msaaLevel;
+      gl = canvas.getContext('webgl2', opts) || canvas.getContext('webgl', opts);
+      if(!gl) { webglBadge.textContent='不支持'; gpuRendererSpan.textContent='WebGL不可用'; startBtn.disabled=true; return false; }
+      webglBadge.textContent = gl.getParameter(gl.VERSION).includes('WebGL 2') ? 'WebGL 2.0' : 'WebGL 1.0';
+      const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+      gpuRendererSpan.textContent = debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL)||'未知' : '无法获取';
+      createNoiseTexture(); applyResolution(); gl.clearColor(0,0,0,1);
+      const ok = compileShaders(); startBtn.disabled = !ok; if(ok) drawScene(); return ok;
+    }
+
+    function createNoiseTexture() {
+      const size=512, data=new Uint8Array(size*size*4);
+      for(let i=0;i<data.length;i+=4){ data[i]=Math.random()*256; data[i+1]=Math.random()*256; data[i+2]=Math.random()*256; data[i+3]=255; }
+      noiseTexture=gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, noiseTexture);
+      gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,size,size,0,gl.RGBA,gl.UNSIGNED_BYTE,data);
+      gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.REPEAT); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.REPEAT);
+    }
+
+    function applyResolution() {
+      const [w,h] = resolutionSelect.value.split('x').map(Number);
+      canvas.width=w; canvas.height=h; if(gl) gl.viewport(0,0,w,h);
+      resolutionDisplay.textContent=`${w}x${h}`;
+    }
+
+    function compileShaders() {
+      const vs = `#version 300 es\nin vec2 aPosition;\nvoid main(){ gl_Position=vec4(aPosition,0.0,1.0); }`;
+      const fs = `#version 300 es\nprecision highp float;\nuniform vec2 iResolution;\nuniform float iTime;\nuniform float iIntensity;\nuniform sampler2D uNoise;\nout vec4 fragColor;\nfloat hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }\nfloat noise(vec2 p){ vec2 i=floor(p),f=fract(p); vec2 u=f*f*(3.0-2.0*f); return mix(mix(hash(i),hash(i+vec2(1,0)),u.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x),u.y); }\nfloat fbm(vec2 p){ float sum=0.0,amp=0.6,freq=2.0; for(int i=0;i<7;i++){ sum+=amp*noise(p*freq); amp*=0.5; freq*=2.0; } return sum; }\nvoid main(){ vec2 uv=gl_FragCoord.xy/iResolution.xy; vec2 p=uv*4.0+vec2(iTime*0.05); float intensity=iIntensity; vec4 nCol=texture(uNoise,uv*2.0+iTime*0.01); float v=0.0; int iter=int(intensity); for(int i=0;i<100;i++){ if(i>=iter) break; vec2 offset=vec2(sin(float(i)*0.4+iTime*0.15),cos(float(i)*0.3))*0.008; v+=fbm(p+offset)*0.8; v+=sin(p.x*5.0+float(i)*0.5)*cos(p.y*6.0)*0.3; v+=tan(p.x*2.0)*0.1; } v=fract(v*0.2); v=mix(v,v*nCol.r,0.3); float r=sin(v*15.0+iTime*1.2)*0.8+0.5; float g=cos(v*12.0-iTime*0.9)*0.8+0.5; float b=sin(v*18.0+iTime*1.5)*0.9+0.4; fragColor=vec4(r,g,b,1.0); }`;
+      function create(s,t){ const sh=gl.createShader(t); gl.shaderSource(sh,s); gl.compileShader(sh); if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS)) return null; return sh; }
+      const vsSh=create(vs,gl.VERTEX_SHADER), fsSh=create(fs,gl.FRAGMENT_SHADER); if(!vsSh||!fsSh) return false;
+      program=gl.createProgram(); gl.attachShader(program,vsSh); gl.attachShader(program,fsSh); gl.linkProgram(program);
+      if(!gl.getProgramParameter(program,gl.LINK_STATUS)) return false;
+      gl.useProgram(program);
+      uniforms.iResolution=gl.getUniformLocation(program,'iResolution'); uniforms.iTime=gl.getUniformLocation(program,'iTime');
+      uniforms.iIntensity=gl.getUniformLocation(program,'iIntensity'); uniforms.uNoise=gl.getUniformLocation(program,'uNoise');
+      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,noiseTexture); gl.uniform1i(uniforms.uNoise,0);
+      const verts=new Float32Array([-1,-1,1,-1,-1,1,1,1]); const buf=gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER,buf); gl.bufferData(gl.ARRAY_BUFFER,verts,gl.STATIC_DRAW);
+      const aPos=gl.getAttribLocation(program,'aPosition'); gl.enableVertexAttribArray(aPos); gl.vertexAttribPointer(aPos,2,gl.FLOAT,false,0,0);
+      return true;
+    }
+
+    function drawScene() { if(!gl||!program) return; gl.clear(gl.COLOR_BUFFER_BIT); gl.uniform2f(uniforms.iResolution,canvas.width,canvas.height); gl.uniform1f(uniforms.iTime,performance.now()/1000%1000); gl.uniform1f(uniforms.iIntensity,parseFloat(intensitySlider.value)); gl.drawArrays(gl.TRIANGLE_STRIP,0,4); }
+    function renderLoop() { if(!isRunning) return; drawScene(); animationFrame=requestAnimationFrame(renderLoop); }
+    function formatElapsed(s){ if(s<0)s=0; const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=Math.floor(s%60); return h>0?`${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`:`${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`; }
+    function updateTimer(){ if(startTime&&isRunning) timerDisplay.textContent=formatElapsed((Date.now()-startTime)/1000); else timerDisplay.textContent='00:00'; }
+    function startTimer(){ if(timerInterval)clearInterval(timerInterval); startTime=Date.now(); updateTimer(); timerInterval=setInterval(updateTimer,200); }
+    function stopTimer(){ if(timerInterval){ clearInterval(timerInterval); timerInterval=null; } startTime=null; timerDisplay.textContent='00:00'; }
+    function setUI(r){ isRunning=r; if(r){ statusText.innerHTML='满载中'; startBtn.disabled=true; stopBtn.disabled=false; }else{ statusText.innerHTML='空闲'; startBtn.disabled=!gl; stopBtn.disabled=true; } }
+    
+    function startBurn(){ 
+      if(!gl) return; 
+      if(isRunning) return; 
+      resetFpsHistory();    // 清空图表历史与最大值
+      // 2秒后启用最大帧率记录
+      maxFpsTimeout = setTimeout(() => { maxFpsEnabled = true; }, 2000);
+      setUI(true); 
+      startTimer(); 
+      renderLoop(); 
+    }
+    
+    function stopBurn(){ 
+      if(!isRunning) return; 
+      if(animationFrame){ cancelAnimationFrame(animationFrame); animationFrame=null; } 
+      stopTimer(); 
+      setUI(false); 
+      if(gl) gl.clear(gl.COLOR_BUFFER_BIT); 
+      // 停止时禁用最大帧率更新
+      maxFpsEnabled = false;
+      if (maxFpsTimeout) {
+        clearTimeout(maxFpsTimeout);
+        maxFpsTimeout = null;
+      }
+    }
+    
+    async function onSettingsChange(){ 
+      const was=isRunning; 
+      if(was) stopBurn(); 
+      applyResolution(); 
+      initWebGL(); 
+      if(was) startBurn(); 
+      else drawScene(); 
+    }
+    
+    intensitySlider.addEventListener('input', ()=> intensityValue.textContent = intensitySlider.value);
+    resolutionSelect.addEventListener('change', onSettingsChange);
+    msaaSelect.addEventListener('change', onSettingsChange);
+    startBtn.addEventListener('click', startBurn);
+    stopBtn.addEventListener('click', stopBurn);
+    window.addEventListener('beforeunload', ()=>{ if(animationFrame) cancelAnimationFrame(animationFrame); });
+    
+    initWebGL(); drawScene();
+    intensityValue.textContent = intensitySlider.value;
+    resolutionDisplay.textContent = canvas.width+'x'+canvas.height;
+    drawChart(); // 初始绘制图表（显示零线）
+  })();
+</script>
+</body>
+</html>

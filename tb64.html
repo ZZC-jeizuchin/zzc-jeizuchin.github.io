@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="googlebot" content="noindex, nofollow">
+    <meta name="baiduspider" content="noindex, nofollow">
+    <meta name="yandex" content="noindex, nofollow">
+    <meta name="bingbot" content="noindex, nofollow">
+    <title>base编解码 - SwCTools</title>
+    <style>
+        /* ===== 主站完整 CSS 变量与主题系统 ===== */
+        :root {
+            --bg-body: #e8edf2;
+            --panel-bg: rgba(255, 255, 255, 0.85);
+            --panel-border: #bdd1e6;
+            --title-color: #1e4b6e;
+            --badge-bg: #d0e2f0;
+            --badge-color: #2c6182;
+            --cat-btn-bg: #d9e8f4;
+            --cat-btn-border: #adc7e0;
+            --cat-btn-color: #1a4059;
+            --cat-btn-hover-bg: #c2d8ed;
+            --jump-row-bg: #e7f0f9;
+            --jump-row-border: #c1d6ea;
+            --input-border: #b3cce2;
+            --input-focus-border: #4f7fa3;
+            --go-btn-bg: #4f7f9e;
+            --go-btn-hover-bg: #3a6b8c;
+            --tool-btn-bg: #cddef0;
+            --tool-btn-border: #a3bed8;
+            --tool-btn-color: #1a4765;
+            --modal-overlay-bg: rgba(22, 50, 70, 0.25);
+            --modal-card-bg: #f3f9ff;
+            --link-item-bg: #d9e8f4;
+            --link-item-border: #adc7e0;
+            --drawer-panel-bg: #f3f9ff;
+            --device-item-bg: #eaf2fc;
+            --device-label-color: #1e4b6e;
+            --device-value-color: #0d3450;
+            --text-color: #173e58;
+            --corner-text-color: #3a6a8e;
+            --fps-bg: rgba(255, 255, 255, 0.6);
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #0a0f14;
+            --panel-bg: rgba(13, 27, 42, 0.9);
+            --panel-border: #1e3a5a;
+            --title-color: #a0c4e8;
+            --badge-bg: #1a3a5c;
+            --badge-color: #b0d0f0;
+            --cat-btn-bg: #1e3a5a;
+            --cat-btn-border: #2a5a8a;
+            --cat-btn-color: #c0d8f0;
+            --cat-btn-hover-bg: #2a5a8a;
+            --jump-row-bg: #122a3e;
+            --jump-row-border: #1e4a6e;
+            --input-border: #2a5a8a;
+            --input-focus-border: #5a9ac0;
+            --go-btn-bg: #2a6a9e;
+            --go-btn-hover-bg: #1a4a7a;
+            --tool-btn-bg: #1e3a5a;
+            --tool-btn-border: #2a5a8a;
+            --tool-btn-color: #c0d8f0;
+            --modal-overlay-bg: rgba(0, 20, 40, 0.5);
+            --modal-card-bg: #0d1b2a;
+            --link-item-bg: #1e3a5a;
+            --link-item-border: #2a5a8a;
+            --drawer-panel-bg: #0d1b2a;
+            --device-item-bg: #122a3e;
+            --device-label-color: #a0c4e8;
+            --device-value-color: #d0e0f0;
+            --text-color: #c0d8f0;
+            --corner-text-color: #7a9ab0;
+            --fps-bg: rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+
+        body {
+            background: var(--bg-body);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            position: relative;
+        }
+
+        .corner-tl {
+            position: fixed;
+            top: 12px;
+            left: 16px;
+            font-size: 0.75rem;
+            color: var(--corner-text-color);
+            opacity: 0.8;
+            z-index: 3000;
+            pointer-events: none;
+        }
+
+        .corner-tr {
+            position: fixed;
+            top: 12px;
+            right: 20px;
+            font-size: 0.75rem;
+            color: var(--corner-text-color);
+            opacity: 0.8;
+            z-index: 3000;
+            pointer-events: none;
+            background: var(--fps-bg);
+            padding: 4px 12px;
+            border-radius: 24px;
+            border: 1px solid var(--panel-border);
+        }
+
+        .corner-br {
+            position: fixed;
+            bottom: 12px;
+            right: 20px;
+            font-size: 0.75rem;
+            color: var(--corner-text-color);
+            opacity: 0.8;
+            z-index: 3000;
+            pointer-events: none;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            bottom: 12px;
+            left: 16px;
+            font-size: 0.9rem;
+            background: var(--cat-btn-bg);
+            border: 1px solid var(--panel-border);
+            color: var(--corner-text-color);
+            padding: 5px 14px;
+            border-radius: 32px;
+            cursor: pointer;
+            opacity: 0.85;
+            transition: 0.2s;
+            z-index: 3000;
+            font-weight: 500;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .theme-toggle:hover {
+            opacity: 1;
+            background: var(--cat-btn-hover-bg);
+        }
+
+        .main-panel {
+            max-width: 1280px;
+            width: 100%;
+            background: var(--panel-bg);
+            border-radius: 28px;
+            box-shadow: 0 16px 30px -8px rgba(30, 65, 90, 0.18);
+            border: 1px solid var(--panel-border);
+            padding: 20px 24px 24px;
+            position: relative;
+        }
+
+        .title-section {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--panel-border);
+        }
+
+        .title-section h1 {
+            font-weight: 550;
+            font-size: 2rem;
+            color: var(--title-color);
+            cursor: default;
+        }
+
+        .badge {
+            color: var(--badge-color);
+            background: var(--badge-bg);
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            border: 1px solid var(--cat-btn-border);
+            cursor: default;
+        }
+
+        .nav-btn {
+            background: var(--tool-btn-bg);
+            border: 1px solid var(--tool-btn-border);
+            color: var(--tool-btn-color);
+            padding: 16px 20px;
+            border-radius: 48px;
+            text-align: center;
+            font-weight: 550;
+            font-size: 1.1rem;
+            transition: all 0.15s;
+            cursor: pointer;
+            display: block;
+            width: 100%;
+            margin-bottom: 16px;
+            appearance: none;
+            -webkit-appearance: none;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            text-decoration: none;
+        }
+
+        .nav-btn:hover {
+            background: var(--cat-btn-hover-bg);
+            border-color: #7b9fc2;
+        }
+
+        .jump-section {
+            margin: 8px 0 12px;
+        }
+
+        .jump-row.textarea-row {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .jump-row {
+            background: var(--jump-row-bg);
+            padding: 10px 18px;
+            border-radius: 60px;
+            margin-bottom: 12px;
+            border: 1px solid var(--jump-row-border);
+        }
+
+        .jump-row textarea {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1.5px solid var(--input-border);
+            border-radius: 48px;
+            background: var(--panel-bg);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            outline: none;
+            color: var(--text-color);
+            resize: vertical;
+            min-height: 140px;
+            line-height: 1.5;
+        }
+
+        .jump-row textarea:focus {
+            border-color: var(--input-focus-border);
+            box-shadow: 0 0 0 3px rgba(79, 127, 163, 0.2);
+        }
+
+        .button-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            background: var(--jump-row-bg);
+            padding: 10px 18px;
+            border-radius: 60px;
+            margin-bottom: 12px;
+            border: 1px solid var(--jump-row-border);
+        }
+
+        .go-btn,
+        .tool-btn {
+            width: 100%;
+            white-space: nowrap;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.15s;
+            -webkit-tap-highlight-color: transparent;
+            padding: 14px 20px;
+            border-radius: 56px;
+            text-align: center;
+        }
+
+        .go-btn {
+            background: var(--go-btn-bg);
+            color: white;
+        }
+
+        .go-btn:hover {
+            background: var(--go-btn-hover-bg);
+        }
+
+        .tool-btn {
+            background: var(--tool-btn-bg);
+            border: 1px solid var(--tool-btn-border);
+            color: var(--tool-btn-color);
+            font-weight: 550;
+        }
+
+        .tool-btn:hover {
+            background: #bcd1e9;
+            border-color: #7b9fc2;
+        }
+
+        @media (max-width: 600px) {
+            .main-panel {
+                padding: 16px 16px 20px;
+            }
+            .button-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="corner-tl">不自由毋宁死 · 不自由毋寧死 · Give me liberty or give me death · 自由か、死か</div>
+<div class="corner-tr" id="fpsDisplay">FPS: --</div>
+<div class="corner-br">made by ZZC-jeizuchin, github</div>
+<button class="theme-toggle" id="themeToggle" aria-label="切换深色模式">深色</button>
+
+<div class="main-panel">
+    <div class="title-section">
+        <h1 id="mainTitle">base64编解码</h1>
+        <span class="badge" id="badgeEl">编码 / 解码</span>
+    </div>
+
+    <a href="index.html" class="nav-btn">← 返回工具箱</a>
+
+    <div class="jump-section">
+        <div class="jump-row textarea-row">
+            <textarea id="htmlInput" rows="6" placeholder="在此输入或粘贴 HTML 代码..."></textarea>
+        </div>
+
+        <div class="button-row">
+            <button class="go-btn" id="encodeBtn">编码为 Base64</button>
+            <button class="go-btn" id="decodeBtn">解码 Base64</button>
+            <button class="tool-btn" id="clearBtn">清空</button>
+            <button class="tool-btn" id="sampleBtn">加载示例</button>
+        </div>
+
+        <div class="jump-row textarea-row">
+            <textarea id="base64Output" rows="5" placeholder="Base64 编码结果将显示在这里..."></textarea>
+        </div>
+
+        <div class="button-row">
+            <button class="tool-btn" id="copyBase64Btn">复制 Base64</button>
+            <button class="tool-btn" id="copyDataUriBtn">复制 Data URI</button>
+            <button class="go-btn" id="previewBtn" style="grid-column: span 2;">预览 HTML</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        "use strict";
+
+        // ==================== 主题切换 ====================
+        const themeToggle = document.getElementById('themeToggle');
+        const currentTheme = localStorage.getItem('swc_theme') || 'light';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        themeToggle.textContent = currentTheme === 'light' ? '深色' : '亮色';
+        themeToggle.addEventListener('click', () => {
+            const newTheme = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('swc_theme', newTheme);
+            themeToggle.textContent = newTheme === 'light' ? '深色' : '亮色';
+        });
+
+        // ==================== FPS 显示 ====================
+        const fpsDisplay = document.getElementById('fpsDisplay');
+        let frameCount = 0,
+            lastFpsUpdate = performance.now();
+        let rafId = null;
+
+        function fpsLoop() {
+            frameCount++;
+            const now = performance.now();
+            if (now - lastFpsUpdate >= 1000) {
+                fpsDisplay.textContent = `FPS: ${Math.round((frameCount * 1000) / (now - lastFpsUpdate))}`;
+                frameCount = 0;
+                lastFpsUpdate = now;
+            }
+            rafId = requestAnimationFrame(fpsLoop);
+        }
+
+        function startFPS() {
+            if (!rafId) rafId = requestAnimationFrame(fpsLoop);
+        }
+
+        function stopFPS() {
+            if (rafId) {
+                cancelAnimationFrame(rafId);
+                rafId = null;
+            }
+        }
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) stopFPS();
+            else startFPS();
+        });
+        startFPS();
+
+        // ==================== 隐藏功能：点击标题5次解锁开发者指南 ====================
+        (function () {
+            const titleH1 = document.getElementById('mainTitle');
+            const badgeEl = document.getElementById('badgeEl');
+            let clickCount = 0;
+            let unlocked = false;
+
+            titleH1.addEventListener('click', () => {
+                if (unlocked) return;
+                clickCount++;
+                if (clickCount >= 5) {
+                    unlocked = true;
+                    badgeEl.textContent = '开发者指南';
+                    badgeEl.style.cursor = 'pointer';
+                    badgeEl.style.userSelect = 'none';
+                    badgeEl.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        window.location.href = 'guide.html';
+                    });
+                }
+            });
+
+            document.addEventListener('click', function (e) {
+                if (!unlocked && !titleH1.contains(e.target)) {
+                    clickCount = 0;
+                }
+            });
+        })();
+
+        // ==================== Base64 工具核心逻辑 ====================
+        const htmlInput = document.getElementById('htmlInput');
+        const base64Output = document.getElementById('base64Output');
+
+        function htmlToBase64(html) {
+            try {
+                return btoa(unescape(encodeURIComponent(html)));
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function base64ToHtml(b64) {
+            try {
+                let clean = b64.trim();
+                if (clean.startsWith('data:text/html;base64,')) {
+                    clean = clean.substring('data:text/html;base64,'.length);
+                } else if (clean.startsWith('data:text/html;charset=utf-8;base64,')) {
+                    clean = clean.substring('data:text/html;charset=utf-8;base64,'.length);
+                }
+                return decodeURIComponent(escape(atob(clean)));
+            } catch (e) {
+                return null;
+            }
+        }
+
+        document.getElementById('encodeBtn').addEventListener('click', () => {
+            const html = htmlInput.value;
+            if (!html.trim()) {
+                alert('请先在输入框中输入 HTML 代码。');
+                return;
+            }
+            const b64 = htmlToBase64(html);
+            if (b64 === null) {
+                alert('编码失败，请检查输入内容。');
+                return;
+            }
+            base64Output.value = b64;
+        });
+
+        document.getElementById('decodeBtn').addEventListener('click', () => {
+            const b64 = base64Output.value;
+            if (!b64.trim()) {
+                alert('请先在 Base64 框中输入或粘贴编码字符串。');
+                return;
+            }
+            const html = base64ToHtml(b64);
+            if (html === null) {
+                alert('解码失败，请确认输入的是有效的 Base64 字符串。');
+                return;
+            }
+            htmlInput.value = html;
+        });
+
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            htmlInput.value = '';
+            base64Output.value = '';
+        });
+
+        document.getElementById('sampleBtn').addEventListener('click', () => {
+            htmlInput.value = `<!DOCTYPE html>
+        <html lang="zh-CN">
+        <head>
+            <meta charset="UTF-8">
+            <title>示例页面</title>
+        </head>
+        <body>
+            <h1>Hello World！你好世界！</h1>
+            <p>这是一段<strong>示例 HTML 代码</strong>，用于测试 Base64 编码功能。</p>
+            <p>支持中文、特殊符号：🎉✨🚀</p>
+            <ul>
+                <li>列表项一</li>
+                <li>列表项二</li>
+                <li>列表项三</li>
+            </ul>
+            <p style="color:blue;">这段文字是蓝色的（通过内联样式）</p>
+        </body>
+        </html>`;
+            base64Output.value = '';
+        });
+
+        document.getElementById('copyBase64Btn').addEventListener('click', () => {
+            const b64 = base64Output.value;
+            if (!b64.trim()) {
+                alert('没有可复制的内容。');
+                return;
+            }
+            copyToClipboard(b64, '纯 Base64 字符串已复制到剪贴板。');
+        });
+
+        document.getElementById('copyDataUriBtn').addEventListener('click', () => {
+            const b64 = base64Output.value;
+            if (!b64.trim()) {
+                alert('没有可复制的内容。');
+                return;
+            }
+            const dataUri = 'data:text/html;base64,' + b64;
+            copyToClipboard(dataUri, 'Data URI 已复制到剪贴板。');
+        });
+
+        document.getElementById('previewBtn').addEventListener('click', () => {
+            const b64 = base64Output.value;
+            if (!b64.trim()) {
+                alert('没有可预览的内容。');
+                return;
+            }
+            const dataUri = 'data:text/html;base64,' + b64;
+            const newWindow = window.open(dataUri, '_blank', 'width=900,height=700,scrollbars=yes,resizable=yes');
+            if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+                alert('弹窗被浏览器拦截，请允许弹窗后重试，或手动复制 Data URI 到浏览器地址栏打开。');
+            }
+        });
+
+        function copyToClipboard(text, successMsg) {
+            if (navigator.clipboard && navigator.clipboard.writeText && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showTemporaryMessage(successMsg);
+                }).catch(() => {
+                    fallbackCopy(text, successMsg);
+                });
+            } else {
+                fallbackCopy(text, successMsg);
+            }
+        }
+
+        function fallbackCopy(text, successMsg) {
+            const tempTextarea = document.createElement('textarea');
+            tempTextarea.value = text;
+            tempTextarea.style.position = 'fixed';
+            tempTextarea.style.top = '-9999px';
+            tempTextarea.style.left = '-9999px';
+            tempTextarea.style.width = '1px';
+            tempTextarea.style.height = '1px';
+            tempTextarea.style.opacity = '0';
+            tempTextarea.setAttribute('readonly', '');
+            document.body.appendChild(tempTextarea);
+            try {
+                tempTextarea.select();
+                tempTextarea.setSelectionRange(0, text.length);
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showTemporaryMessage(successMsg);
+                } else {
+                    alert('复制失败，请手动选择文本后使用 Ctrl+C 复制。');
+                }
+            } catch (err) {
+                alert('复制出错，请手动选择文本后使用 Ctrl+C 复制。');
+            }
+            document.body.removeChild(tempTextarea);
+        }
+
+        function showTemporaryMessage(msg) {
+            const tempDiv = document.createElement('div');
+            tempDiv.textContent = msg;
+            tempDiv.style.position = 'fixed';
+            tempDiv.style.bottom = '80px';
+            tempDiv.style.left = '50%';
+            tempDiv.style.transform = 'translateX(-50%)';
+            tempDiv.style.background = 'var(--panel-bg)';
+            tempDiv.style.color = 'var(--text-color)';
+            tempDiv.style.padding = '8px 20px';
+            tempDiv.style.borderRadius = '40px';
+            tempDiv.style.border = '1px solid var(--panel-border)';
+            tempDiv.style.boxShadow = '0 8px 20px rgba(0,0,0,0.15)';
+            tempDiv.style.zIndex = '9999';
+            tempDiv.style.fontWeight = '500';
+            document.body.appendChild(tempDiv);
+            setTimeout(() => {
+                tempDiv.style.opacity = '0';
+                tempDiv.style.transition = 'opacity 0.3s';
+                setTimeout(() => document.body.removeChild(tempDiv), 300);
+            }, 1500);
+        }
+
+        document.addEventListener('keydown', function (e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                const activeEl = document.activeElement;
+                if (activeEl === htmlInput) {
+                    e.preventDefault();
+                    document.getElementById('encodeBtn').click();
+                } else if (activeEl === base64Output) {
+                    e.preventDefault();
+                    document.getElementById('decodeBtn').click();
+                }
+            }
+        });
+
+        console.log('HTML 转 Base64 工具已就绪。');
+    })();
+</script>
+</body>
+</html>

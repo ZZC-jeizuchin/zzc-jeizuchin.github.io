@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>内存压力测试 · 多线程 · SwCTools</title>
+  <style>
+    :root {
+      --bg-body: #e8edf2;
+      --panel-bg: rgba(255, 255, 255, 0.85);
+      --panel-border: #bdd1e6;
+      --title-color: #1e4b6e;
+      --badge-bg: #d0e2f0;
+      --badge-color: #2c6182;
+      --cat-btn-bg: #d9e8f4;
+      --cat-btn-border: #adc7e0;
+      --cat-btn-color: #1a4059;
+      --cat-btn-hover-bg: #c2d8ed;
+      --jump-row-bg: #e7f0f9;
+      --input-border: #b3cce2;
+      --go-btn-bg: #4f7f9e;
+      --go-btn-hover-bg: #3a6b8c;
+      --tool-btn-bg: #cddef0;
+      --tool-btn-border: #a3bed8;
+      --tool-btn-color: #1a4765;
+      --device-item-bg: #eaf2fc;
+      --device-label-color: #1e4b6e;
+      --device-value-color: #0d3450;
+      --text-color: #173e58;
+      --corner-text-color: #3a6a8e;
+      --fps-bg: rgba(255, 255, 255, 0.6);
+      --stress-btn-bg: #4f7f9e;
+      --stress-btn-shadow: #2a4a6a;
+    }
+
+    [data-theme="dark"] {
+      --bg-body: #0a0f14;
+      --panel-bg: rgba(13, 27, 42, 0.9);
+      --panel-border: #1e3a5a;
+      --title-color: #a0c4e8;
+      --badge-bg: #1a3a5c;
+      --badge-color: #b0d0f0;
+      --cat-btn-bg: #1e3a5a;
+      --cat-btn-border: #2a5a8a;
+      --cat-btn-color: #c0d8f0;
+      --cat-btn-hover-bg: #2a5a8a;
+      --jump-row-bg: #122a3e;
+      --input-border: #2a5a8a;
+      --go-btn-bg: #2a6a9e;
+      --go-btn-hover-bg: #1a4a7a;
+      --tool-btn-bg: #1e3a5a;
+      --tool-btn-border: #2a5a8a;
+      --tool-btn-color: #c0d8f0;
+      --device-item-bg: #122a3e;
+      --device-label-color: #a0c4e8;
+      --device-value-color: #d0e0f0;
+      --text-color: #c0d8f0;
+      --corner-text-color: #7a9ab0;
+      --fps-bg: rgba(0, 0, 0, 0.5);
+      --stress-btn-bg: #2a6a9e;
+      --stress-btn-shadow: #1a3a5a;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+    body { background: var(--bg-body); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 12px; position: relative; }
+
+    .corner-tl { position: fixed; top: 12px; left: 16px; font-size: 0.75rem; color: var(--corner-text-color); opacity: 0.8; z-index: 3000; pointer-events: none; }
+    .corner-tr { position: fixed; top: 12px; right: 20px; font-size: 0.75rem; color: var(--corner-text-color); opacity: 0.8; z-index: 3000; pointer-events: none; background: var(--fps-bg); padding: 4px 12px; border-radius: 24px; border: 1px solid var(--panel-border); }
+    .corner-br { position: fixed; bottom: 12px; right: 20px; font-size: 0.75rem; color: var(--corner-text-color); opacity: 0.8; z-index: 3000; pointer-events: none; }
+    .theme-toggle {
+      position: fixed; bottom: 12px; left: 16px; font-size: 0.9rem; background: var(--cat-btn-bg);
+      border: 1px solid var(--panel-border); color: var(--corner-text-color); padding: 5px 14px;
+      border-radius: 32px; cursor: pointer; opacity: 0.85; z-index: 3000;
+      font-weight: 500; -webkit-tap-highlight-color: transparent;
+    }
+    .theme-toggle:hover { opacity: 1; background: var(--cat-btn-hover-bg); }
+
+    .main-panel { max-width: 680px; width: 100%; background: var(--panel-bg); border-radius: 28px; box-shadow: 0 16px 30px -8px rgba(30, 65, 90, 0.18); border: 1px solid var(--panel-border); padding: 26px 28px 32px; }
+    .title-section { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+    .title-section h1 { font-weight: 550; font-size: 2rem; color: var(--title-color); }
+    .badge { color: var(--badge-color); background: var(--badge-bg); padding: 6px 18px; border-radius: 40px; font-size: 0.9rem; border: 1px solid var(--cat-btn-border); }
+    .back-btn {
+      display: inline-block; background: var(--cat-btn-bg); border: 1px solid var(--cat-btn-border);
+      color: var(--cat-btn-color); padding: 8px 18px; border-radius: 36px; font-weight: 520;
+      text-decoration: none; margin: 8px 0 16px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .back-btn:hover { background: var(--cat-btn-hover-bg); }
+
+    .control-group { margin-bottom: 20px; }
+    .control-label { display: block; font-weight: 500; color: var(--device-label-color); margin-bottom: 8px; text-transform: uppercase; font-size: 0.9rem; }
+    .size-input-wrapper { display: flex; align-items: center; gap: 12px; background: var(--jump-row-bg); padding: 6px 6px 6px 20px; border-radius: 48px; border: 1px solid var(--input-border); margin-bottom: 8px; }
+    .size-input-wrapper input { flex: 1; padding: 14px 8px; border: none; background: transparent; font-size: 1.2rem; outline: none; color: var(--text-color); font-family: monospace; }
+    .size-input-wrapper span { padding-right: 8px; color: var(--device-label-color); font-weight: 500; }
+    .slider-header { display: flex; justify-content: space-between; margin-bottom: 4px; font-weight: 500; color: var(--text-color); font-size: 0.9rem; }
+    .slider-header span { background: var(--jump-row-bg); padding: 3px 12px; border-radius: 28px; font-family: monospace; border: 1px solid var(--panel-border); }
+    input[type=range] { width: 100%; margin: 4px 0 12px; -webkit-appearance: none; background: transparent; }
+    input[type=range]::-webkit-slider-runnable-track { height: 6px; background: var(--jump-row-bg); border-radius: 8px; border: 1px solid var(--panel-border); }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 20px; width: 20px; border-radius: 20px; background: var(--go-btn-bg); margin-top: -8px; box-shadow: 0 2px 6px rgba(30,75,110,0.25); border: 2px solid #d0e4f5; cursor: grab; }
+    .hint-text { font-size: 0.8rem; color: var(--corner-text-color); margin-top: 4px; text-align: right; }
+
+    .stress-btn-group { display: flex; gap: 16px; margin: 20px 0 24px; }
+    .nav-btn {
+      background: var(--stress-btn-bg); border: none; color: white; padding: 16px 20px;
+      border-radius: 60px; font-weight: 650; font-size: 1.3rem; cursor: pointer; flex: 1;
+      text-align: center; text-transform: uppercase; letter-spacing: 1px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .nav-btn.secondary {
+      background: var(--tool-btn-bg); border: 1px solid var(--tool-btn-border);
+      color: var(--tool-btn-color);
+    }
+    .nav-btn:disabled { opacity: 0.5; background: #6a7a8a; cursor: not-allowed; }
+
+    .status-panel { background: var(--device-item-bg); border-radius: 24px; padding: 20px 24px; margin-top: 8px; border: 1px solid var(--panel-border); }
+    .status-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+    .status-item { display: flex; align-items: baseline; gap: 8px; }
+    .status-label { color: var(--device-label-color); font-size: 0.85rem; text-transform: uppercase; }
+    .status-value { font-weight: 700; font-size: 1.4rem; font-family: monospace; color: var(--title-color); }
+
+    /* 新速度面板：居中，使用锐利等宽字体 */
+    .speed-panel {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--panel-border);
+      text-align: center;
+    }
+    .mono-number {
+      font-family: ui-monospace, 'SF Mono', 'Cascadia Code', 'Consolas', 'Liberation Mono', Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace;
+      font-weight: 450;
+      font-variant-numeric: tabular-nums;
+    }
+    .speed-big {
+      font-size: 3.5rem;
+      font-weight: 450;
+      color: #d96500;
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+    }
+    .speed-unit-large {
+      font-size: 1.2rem;
+      color: var(--device-label-color);
+      margin-left: 6px;
+      font-weight: 400;
+    }
+    .speed-details {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin-top: 10px;
+    }
+    .detail-item {
+      text-align: center;
+    }
+    .detail-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      color: var(--device-label-color);
+    }
+    .detail-value {
+      font-size: 1.6rem;
+      font-weight: 450;
+      color: var(--text-color);
+      line-height: 1.3;
+    }
+    .detail-unit {
+      font-size: 0.8rem;
+      color: var(--device-label-color);
+      margin-left: 2px;
+    }
+
+    .chart-container { margin-top: 20px; background: rgba(0,0,0,0.05); border-radius: 12px; padding: 8px; }
+    [data-theme="dark"] .chart-container { background: rgba(255,255,255,0.05); }
+    canvas { display: block; width: 100%; height: 80px; border-radius: 8px; }
+    .chart-max-label { font-size: 0.75rem; color: var(--device-label-color); margin-top: 4px; text-align: right; }
+
+    .warning-note { margin-top: 22px; font-size: 0.9rem; color: #cc7f2a; background: rgba(255, 140, 0, 0.08); padding: 14px 20px; border-radius: 24px; border-left: 6px solid #e06b00; }
+
+    select { background: var(--jump-row-bg); border: 1px solid var(--input-border); color: var(--text-color); padding: 12px 20px; border-radius: 40px; font-size: 1rem; outline: none; width: 100%; margin-top: 8px; }
+
+    @media (max-width: 480px) {
+      .main-panel { padding: 20px 18px 24px; }
+      .stress-btn-group { flex-direction: column; }
+      .speed-big { font-size: 2.8rem; }
+      .detail-value { font-size: 1.4rem; }
+      .speed-details { gap: 20px; }
+    }
+  </style>
+</head>
+<body>
+<div class="corner-tl">不自由毋宁死 · 不自由毋寧死 · Give me liberty or give me death · 自由か、死か</div>
+<div class="corner-tr" id="fpsDisplay">FPS: --</div>
+<div class="corner-br">made by ZZC-jeizuchin, Github</div>
+<button class="theme-toggle" id="themeToggle" aria-label="切换深色模式">深色</button>
+
+<div class="main-panel">
+  <div class="title-section">
+    <h1>内存压力测试</h1>
+    <span class="badge" id="memoryBadge">0.0 GB</span>
+  </div>
+  <a href="index.html" class="back-btn">← 返回主站</a>
+
+  <div class="control-group">
+    <div class="slider-header">
+      <label>分配内存大小 (GB)</label>
+      <span id="memorySizeValue">2.0</span>
+    </div>
+    <input type="range" id="memorySizeSlider" min="0.1" max="16" value="2.0" step="0.1">
+    <div class="hint-text">硬件核心: <span id="coreHint"></span> · 最大 <span id="maxMemHint">16.0</span> GB</div>
+  </div>
+
+  <div class="control-group">
+    <div class="slider-header">
+      <label>Worker 线程数</label>
+      <span id="workerCountValue">8</span>
+    </div>
+    <input type="range" id="workerCountSlider" min="1" max="64" value="8" step="1">
+  </div>
+
+  <div class="control-group">
+    <div class="control-label">分块大小 (MB)</div>
+    <select id="blockSizeSelect">
+      <option value="1">1 MB</option><option value="4">4 MB</option><option value="16">16 MB</option>
+      <option value="32">32 MB</option><option value="64" selected>64 MB</option>
+      <option value="128">128 MB</option><option value="192">192 MB</option>
+      <option value="256">256 MB</option>
+      <option value="512">512 MB</option><option value="768">768 MB</option><option value="1024">1024 MB</option>
+    </select>
+  </div>
+
+  <div class="control-group">
+    <div class="control-label">数据类型 (10种)</div>
+    <select id="viewTypeSelect">
+      <option value="uint8" selected>Uint8Array (1B · 推荐)</option>
+      <option value="int8">Int8Array (1B)</option>
+      <option value="uint16">Uint16Array (2B)</option>
+      <option value="int16">Int16Array (2B)</option>
+      <option value="uint32">Uint32Array (4B)</option>
+      <option value="int32">Int32Array (4B)</option>
+      <option value="float32">Float32Array (4B浮点)</option>
+      <option value="float64">Float64Array (8B双精度)</option>
+      <option value="bigint64">BigInt64Array (8B·BigInt)</option>
+      <option value="biguint64">BigUint64Array (8B·BigInt)</option>
+    </select>
+  </div>
+
+  <div class="control-group">
+    <div class="control-label">填充方式</div>
+    <select id="fillModeSelect">
+      <option value="math" selected>Math.random (经典随机)</option>
+      <option value="fixed">固定值 0xA5 (极限带宽)</option>
+    </select>
+  </div>
+
+  <div class="stress-btn-group">
+    <button class="nav-btn" id="startBtn">开始</button>
+    <button class="nav-btn secondary" id="stopBtn" disabled>停止</button>
+  </div>
+
+  <div class="status-panel">
+    <div class="status-row">
+      <div class="status-item"><span class="status-label">状态</span><span class="status-value" id="statusText">空闲</span></div>
+      <div class="status-item"><span class="status-label">运行时长</span><span class="status-value" id="timerDisplay">00:00</span></div>
+    </div>
+    <div class="status-row">
+      <div class="status-item"><span class="status-label">占位符数量</span><span class="status-value" id="chunkCount">0</span></div>
+      <div class="status-item"><span class="status-label">活跃 Worker</span><span class="status-value" id="activeWorkers">0</span></div>
+    </div>
+
+    <!-- 全新速度面板：居中，无日志 -->
+    <div class="speed-panel">
+      <div>
+        <span class="speed-big mono-number" id="writeSpeed">0.00</span>
+        <span class="speed-unit-large" id="speedUnit">GB/s</span>
+      </div>
+      <div style="font-size:0.9rem; color:var(--device-label-color); margin-top:2px;" id="mbpsDisplay">0.00 Mbps</div>
+      <div class="speed-details">
+        <div class="detail-item">
+          <div class="detail-label">平均</div>
+          <div><span class="detail-value mono-number" id="avgSpeed">0.000</span><span class="detail-unit">GB/s</span></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">累计</div>
+          <div><span class="detail-value mono-number" id="totalWritten">0.000</span><span class="detail-unit">GB</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-container">
+    <canvas id="speedChart" width="600" height="80"></canvas>
+    <div class="chart-max-label">峰值 <span id="chartMaxLabel">0.00</span> GB/s · 最近10秒</div>
+  </div>
+
+  <div class="warning-note">
+    每个占位符 ~0.1 GB (已对齐 8 字节)。固定值填充可测纯内存写入带宽上限。
+  </div>
+</div>
+
+<script>
+  (function(){
+    "use strict";
+
+    // 深色模式
+    const themeToggle = document.getElementById('themeToggle');
+    const currentTheme = localStorage.getItem('swc_theme') || 'light';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    themeToggle.textContent = currentTheme === 'light' ? '深色' : '亮色';
+    themeToggle.addEventListener('click', () => {
+      const newTheme = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('swc_theme', newTheme);
+      themeToggle.textContent = newTheme === 'light' ? '深色' : '亮色';
+    });
+
+    // 帧率
+    const fpsDisplay = document.getElementById('fpsDisplay');
+    let frameCount = 0, lastFpsUpdate = performance.now();
+    function updateFPS() { frameCount++; const now = performance.now(); if(now - lastFpsUpdate >= 1000) { fpsDisplay.textContent = `FPS: ${Math.round((frameCount * 1000) / (now - lastFpsUpdate))}`; frameCount = 0; lastFpsUpdate = now; } requestAnimationFrame(updateFPS); }
+    requestAnimationFrame(updateFPS);
+
+    // DOM
+    const memorySizeSlider = document.getElementById('memorySizeSlider');
+    const memorySizeValue = document.getElementById('memorySizeValue');
+    const workerCountSlider = document.getElementById('workerCountSlider');
+    const workerCountValue = document.getElementById('workerCountValue');
+    const blockSizeSelect = document.getElementById('blockSizeSelect');
+    const viewTypeSelect = document.getElementById('viewTypeSelect');
+    const fillModeSelect = document.getElementById('fillModeSelect');
+    const coreHint = document.getElementById('coreHint');
+    const maxMemHint = document.getElementById('maxMemHint');
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const statusText = document.getElementById('statusText');
+    const timerDisplay = document.getElementById('timerDisplay');
+    const chunkCountSpan = document.getElementById('chunkCount');
+    const activeWorkersSpan = document.getElementById('activeWorkers');
+    const writeSpeedSpan = document.getElementById('writeSpeed');
+    const speedUnitSpan = document.getElementById('speedUnit');
+    const mbpsDisplay = document.getElementById('mbpsDisplay');
+    const avgSpeedSpan = document.getElementById('avgSpeed');
+    const memoryBadge = document.getElementById('memoryBadge');
+    const totalWrittenSpan = document.getElementById('totalWritten');
+    const canvas = document.getElementById('speedChart');
+    const ctx = canvas.getContext('2d');
+    const chartMaxLabel = document.getElementById('chartMaxLabel');
+
+    // 硬件
+    const hardwareCores = navigator.hardwareConcurrency || 8;
+    coreHint.textContent = hardwareCores;
+    const deviceMemoryGB = navigator.deviceMemory || 4;
+    let maxMemoryGB = Math.min(deviceMemoryGB * 1.5, 64);
+    if (maxMemoryGB < 1) maxMemoryGB = 16;
+    maxMemoryGB = Math.round(maxMemoryGB * 10) / 10;
+    memorySizeSlider.max = maxMemoryGB;
+    maxMemHint.textContent = maxMemoryGB.toFixed(1);
+    memorySizeSlider.value = Math.min(2.0, maxMemoryGB);
+    memorySizeValue.textContent = memorySizeSlider.value;
+
+    const maxWorkers = Math.min(64, hardwareCores * 4);
+    workerCountSlider.max = maxWorkers;
+    workerCountSlider.value = Math.min(8, maxWorkers);
+    workerCountValue.textContent = workerCountSlider.value;
+
+    memorySizeSlider.addEventListener('input', () => memorySizeValue.textContent = parseFloat(memorySizeSlider.value).toFixed(1));
+    workerCountSlider.addEventListener('input', () => workerCountValue.textContent = workerCountSlider.value);
+
+    // 对齐8字节 (兼容所有TypedArray)
+    const RAW_CHUNK = 0.1 * 1024 * 1024 * 1024;
+    const CHUNK_SIZE = Math.floor(RAW_CHUNK / 8) * 8;
+
+    let memoryBlocks = [];
+    let workers = [];
+    let isRunning = false;
+    let startTime = null;
+    let firstWriteTime = null;
+    let timerInterval = null;
+    let statsInterval = null;
+    let rafId = null;
+    let totalBytesWritten = 0;
+    let lastTotal = 0;
+    let lastUpdateTime = 0;
+    let currentAvg = 0;
+
+    const MAX_POINTS = 20;
+    let speedHistory = [];
+    let lastChartRecord = 0;
+    let lastDrawTime = 0;
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60), s = Math.floor(sec % 60);
+      return `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+    }
+    function updateTimer() {
+      if (startTime && isRunning) timerDisplay.textContent = formatTime((Date.now() - startTime) / 1000);
+      else timerDisplay.textContent = '00:00';
+    }
+
+    function drawChart() {
+      const w = canvas.width, h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+      if (speedHistory.length < 2) return;
+      const maxV = Math.max(...speedHistory, 0.1);
+      chartMaxLabel.textContent = maxV.toFixed(2);
+      ctx.beginPath();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#d96500';
+      const stepX = w / (MAX_POINTS - 1);
+      speedHistory.forEach((v, i) => {
+        const x = i * stepX;
+        const y = h - (v / maxV) * (h - 8) - 4;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+      if (currentAvg > 0) {
+        const avgY = h - (currentAvg / maxV) * (h - 8) - 4;
+        ctx.beginPath();
+        ctx.strokeStyle = '#1e4b6e';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4,4]);
+        ctx.moveTo(0, avgY);
+        ctx.lineTo(w, avgY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
+
+    function startChartLoop() {
+      if (rafId) cancelAnimationFrame(rafId);
+      function loop(now) {
+        rafId = requestAnimationFrame(loop);
+        if (now - lastDrawTime >= 66) { drawChart(); lastDrawTime = now; }
+      }
+      rafId = requestAnimationFrame(loop);
+    }
+    function stopChartLoop() { if (rafId) { cancelAnimationFrame(rafId); rafId = null; } }
+
+    function updateStats() {
+      if (!isRunning) return;
+      updateTimer();
+      const now = Date.now();
+      const elapsed = (now - lastUpdateTime) / 1000;
+      if (elapsed >= 0.2) {
+        const bytes = totalBytesWritten - lastTotal;
+        const gb = bytes / (1024**3);
+        const mbps = (bytes * 8) / (1024**2);
+        const gbPerSec = gb / elapsed;
+        const mbpsPerSec = mbps / elapsed;
+
+        if (gbPerSec >= 1.0) { writeSpeedSpan.textContent = gbPerSec.toFixed(2); speedUnitSpan.textContent = 'GB/s'; }
+        else if (gbPerSec >= 0.01) { writeSpeedSpan.textContent = (gbPerSec * 1000).toFixed(2); speedUnitSpan.textContent = 'MB/s'; }
+        else { writeSpeedSpan.textContent = (mbpsPerSec / 8).toFixed(2); speedUnitSpan.textContent = 'MB/s'; }
+        mbpsDisplay.textContent = `${mbpsPerSec.toFixed(2)} Mbps`;
+        totalWrittenSpan.textContent = (totalBytesWritten / (1024**3)).toFixed(3);
+
+        if (firstWriteTime && totalBytesWritten > 0) {
+          const avgElapsed = (now - firstWriteTime) / 1000;
+          const avgGB = totalBytesWritten / (1024**3);
+          currentAvg = avgGB / avgElapsed;
+          avgSpeedSpan.textContent = currentAvg.toFixed(3);
+        }
+
+        if (now - lastChartRecord >= 500) {
+          speedHistory.push(gbPerSec);
+          if (speedHistory.length > MAX_POINTS) speedHistory.shift();
+          lastChartRecord = now;
+        }
+
+        lastTotal = totalBytesWritten;
+        lastUpdateTime = now;
+      }
+    }
+
+    function startMonitoring() {
+      totalBytesWritten = 0; lastTotal = 0; lastUpdateTime = Date.now(); firstWriteTime = null;
+      currentAvg = 0; speedHistory = []; lastChartRecord = 0; lastDrawTime = 0;
+      chartMaxLabel.textContent = '0.00'; avgSpeedSpan.textContent = '0.000';
+      writeSpeedSpan.textContent = '0.00'; mbpsDisplay.textContent = '0.00 Mbps';
+      totalWrittenSpan.textContent = '0.000'; speedUnitSpan.textContent = 'GB/s';
+      if (statsInterval) clearInterval(statsInterval);
+      statsInterval = setInterval(updateStats, 200);
+      startChartLoop();
+    }
+
+    function stopMonitoring() {
+      if (statsInterval) { clearInterval(statsInterval); statsInterval = null; }
+      stopChartLoop();
+      writeSpeedSpan.textContent = '0.00'; mbpsDisplay.textContent = '0.00 Mbps';
+      totalWrittenSpan.textContent = '0.000'; avgSpeedSpan.textContent = '0.000';
+      speedHistory = []; drawChart(); chartMaxLabel.textContent = '0.00';
+    }
+
+    function fullStop() {
+      isRunning = false;
+      if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+      stopMonitoring();
+      workers.forEach(w => { try { w.postMessage({ type: 'stop' }); w.terminate(); } catch(e) {} });
+      workers = []; memoryBlocks = [];
+      activeWorkersSpan.textContent = '0'; chunkCountSpan.textContent = '0';
+      memoryBadge.textContent = '0.0 GB'; statusText.textContent = '空闲';
+      startBtn.disabled = false; stopBtn.disabled = true;
+      memorySizeSlider.disabled = false; workerCountSlider.disabled = false;
+      blockSizeSelect.disabled = false; viewTypeSelect.disabled = false;
+      fillModeSelect.disabled = false;
+      timerDisplay.textContent = '00:00'; firstWriteTime = null;
+    }
+
+    // 创建Worker (修复8字节对齐)
+    function createWorker(id, buffers, blockBytes, typeKey, fillMode) {
+      const typeMap = {
+        uint8:    { ctor: 'Uint8Array',    bytes: 1, isBigInt: false, isFloat: false },
+        int8:     { ctor: 'Int8Array',     bytes: 1, isBigInt: false, isFloat: false },
+        uint16:   { ctor: 'Uint16Array',   bytes: 2, isBigInt: false, isFloat: false },
+        int16:    { ctor: 'Int16Array',    bytes: 2, isBigInt: false, isFloat: false },
+        uint32:   { ctor: 'Uint32Array',   bytes: 4, isBigInt: false, isFloat: false },
+        int32:    { ctor: 'Int32Array',    bytes: 4, isBigInt: false, isFloat: false },
+        float32:  { ctor: 'Float32Array',  bytes: 4, isBigInt: false, isFloat: true },
+        float64:  { ctor: 'Float64Array',  bytes: 8, isBigInt: false, isFloat: true },
+        bigint64: { ctor: 'BigInt64Array', bytes: 8, isBigInt: true,  isFloat: false },
+        biguint64:{ ctor: 'BigUint64Array',bytes: 8, isBigInt: true,  isFloat: false }
+      };
+      const conf = typeMap[typeKey];
+      const bytesPerElement = conf.bytes;
+      const alignedBlockBytes = Math.floor(blockBytes / bytesPerElement) * bytesPerElement;
+      const stepElements = alignedBlockBytes / bytesPerElement;
+      const useFixed = (fillMode === 'fixed');
+
+      const workerCode = `
+        const TYPE = '${conf.ctor}';
+        const BYTES_PER_ELEMENT = ${bytesPerElement};
+        const STEP = ${stepElements};
+        const IS_BIGINT = ${conf.isBigInt};
+        const IS_FLOAT = ${conf.isFloat};
+        const USE_FIXED = ${useFixed};
+        let running = true;
+        let views = [];
+        let roundBytes = 0;
+
+        self.onmessage = function(e) {
+          if (e.data.type === 'init') {
+            const buffers = e.data.buffers;
+            if (!buffers || buffers.length === 0) return;
+            for (const buf of buffers) {
+              views.push(new self[TYPE](buf));
+              roundBytes += buf.byteLength;
+            }
+            writeLoop();
+          } else if (e.data.type === 'stop') {
+            running = false;
+          }
+        };
+
+        function getFillValue() {
+          if (USE_FIXED) {
+            if (IS_BIGINT) return 0xA5n;
+            if (IS_FLOAT) return 0xA5;
+            return 0xA5;
+          } else {
+            if (IS_BIGINT) {
+              const high = BigInt(Math.floor(Math.random() * 0x100000000));
+              const low = BigInt(Math.floor(Math.random() * 0x100000000));
+              return (high << 32n) | low;
+            }
+            if (IS_FLOAT) return Math.random();
+            if (BYTES_PER_ELEMENT === 1) return Math.floor(Math.random() * 256);
+            if (BYTES_PER_ELEMENT === 2) return Math.floor(Math.random() * 65536);
+            return Math.floor(Math.random() * 0x100000000);
+          }
+        }
+
+        function writeLoop() {
+          while (running) {
+            for (const view of views) {
+              const len = view.length;
+              const fillValue = getFillValue();
+              for (let i = 0; i < len; i += STEP) {
+                const end = Math.min(i + STEP, len);
+                view.subarray(i, end).fill(fillValue);
+              }
+            }
+            self.postMessage({ type: 'round', bytes: roundBytes });
+          }
+        }
+      `;
+
+      const blob = new Blob([workerCode], { type: 'application/javascript' });
+      const worker = new Worker(URL.createObjectURL(blob));
+      worker.onmessage = (e) => {
+        if (e.data.type === 'round') {
+          if (!firstWriteTime) firstWriteTime = Date.now();
+          totalBytesWritten += e.data.bytes;
+        }
+      };
+      worker.onerror = (e) => console.error('Worker error:', e);
+      worker.postMessage({ type: 'init', buffers: buffers }, buffers);
+      return worker;
+    }
+
+    async function startStress() {
+      if (isRunning) return;
+      fullStop();
+
+      let gb = parseFloat(memorySizeSlider.value);
+      if (isNaN(gb) || gb < 0.1) gb = 2.0;
+      memorySizeSlider.value = gb;
+      memorySizeValue.textContent = gb.toFixed(1);
+      const blockCount = Math.round(gb / 0.1);
+      const workerCount = parseInt(workerCountSlider.value, 10);
+      let blockMB = parseInt(blockSizeSelect.value, 10);
+      let blockBytes = blockMB * 1024 * 1024;
+      const typeKey = viewTypeSelect.value;
+      const fillMode = fillModeSelect.value;
+
+      statusText.textContent = '分配中...';
+      startBtn.disabled = true;
+      memorySizeSlider.disabled = true; workerCountSlider.disabled = true;
+      blockSizeSelect.disabled = true; viewTypeSelect.disabled = true;
+      fillModeSelect.disabled = true;
+
+      memoryBlocks = [];
+      for (let i = 0; i < blockCount; i++) {
+        await new Promise(resolve => {
+          setTimeout(() => {
+            try { memoryBlocks.push(new ArrayBuffer(CHUNK_SIZE)); } catch (e) {}
+            chunkCountSpan.textContent = memoryBlocks.length;
+            const totalGB = memoryBlocks.length * CHUNK_SIZE / 1024 / 1024 / 1024;
+            memoryBadge.textContent = `${totalGB.toFixed(2)} GB`;
+            resolve();
+          }, 5);
+        });
+        if (memoryBlocks.length !== i + 1) break;
+      }
+
+      if (memoryBlocks.length === 0) { alert('分配失败'); fullStop(); return; }
+
+      const perWorker = Math.floor(memoryBlocks.length / workerCount);
+      const rem = memoryBlocks.length % workerCount;
+      let idx = 0;
+      for (let i = 0; i < workerCount; i++) {
+        const cnt = perWorker + (i < rem ? 1 : 0);
+        if (cnt === 0) continue;
+        const wb = memoryBlocks.slice(idx, idx + cnt);
+        idx += cnt;
+        workers.push(createWorker(i, wb, blockBytes, typeKey, fillMode));
+      }
+
+      activeWorkersSpan.textContent = workers.length;
+      statusText.textContent = '满载中';
+      isRunning = true;
+      stopBtn.disabled = false;
+      startTime = Date.now();
+      timerInterval = setInterval(updateTimer, 200);
+      startMonitoring();
+    }
+
+    function stopStress() { if (isRunning) fullStop(); }
+
+    startBtn.addEventListener('click', startStress);
+    stopBtn.addEventListener('click', stopStress);
+    window.addEventListener('beforeunload', () => { if (isRunning) fullStop(); });
+
+    function resizeCanvas() {
+      canvas.width = canvas.parentElement.clientWidth || 600;
+      canvas.height = 80;
+      drawChart();
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+  })();
+</script>
+</body>
+</html>

@@ -12,12 +12,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closetag.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/xml-fold.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
   <style>
     :root {
       --bg-body: #e8edf2;
-      --panel-bg: rgba(255, 255, 255, 0.9);
+      --panel-bg: rgba(255, 255, 255, 0.85);
       --panel-border: #bdd1e6;
       --title-color: #1e4b6e;
       --btn-bg: #d9e8f4;
@@ -36,7 +34,7 @@
 
     [data-theme="dark"] {
       --bg-body: #0a0f14;
-      --panel-bg: rgba(13, 27, 42, 0.95);
+      --panel-bg: rgba(13, 27, 42, 0.9);
       --panel-border: #1e3a5a;
       --title-color: #a0c4e8;
       --btn-bg: #1e3a5a;
@@ -55,55 +53,57 @@
 
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
     body { background: var(--bg-body); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 12px; overflow: hidden; position: relative; }
-    .corner-tl { position: fixed; top: 12px; left: 16px; font-size: 0.75rem; color: var(--corner-text-color); opacity: 0.8; z-index: 10; pointer-events: none; }
-    .corner-tr { position: fixed; top: 12px; right: 20px; font-size: 0.75rem; color: var(--corner-text-color); opacity: 0.8; z-index: 10; pointer-events: none; background: var(--fps-bg); padding: 4px 12px; border-radius: 24px; border: 1px solid var(--panel-border); }
-    .corner-br { position: fixed; bottom: 12px; right: 20px; font-size: 0.75rem; color: var(--corner-text-color); opacity: 0.8; z-index: 10; pointer-events: none; }
-    .theme-toggle { position: fixed; bottom: 12px; left: 16px; font-size: 1rem; background: var(--btn-bg); border: 1px solid var(--panel-border); color: var(--corner-text-color); padding: 6px 16px; border-radius: 32px; cursor: pointer; opacity: 0.85; transition: 0.2s; z-index: 20; font-weight: 500; }
+
+    .corner-tl { position: fixed; top: 12px; left: 16px; font-size: 0.75rem; color: var(--corner-text-color); opacity: 0.8; z-index: 3000; pointer-events: none; }
+    .corner-tr { position: fixed; top: 12px; right: 20px; font-size: 0.75rem; color: var(--corner-text-color); opacity: 0.8; z-index: 3000; pointer-events: none; background: var(--fps-bg); padding: 4px 12px; border-radius: 24px; border: 1px solid var(--panel-border); }
+    .corner-br { position: fixed; bottom: 12px; right: 20px; font-size: 0.75rem; color: var(--corner-text-color); opacity: 0.8; z-index: 3000; pointer-events: none; }
+    .theme-toggle {
+      position: fixed; bottom: 12px; left: 16px; font-size: 0.9rem; background: var(--btn-bg);
+      border: 1px solid var(--panel-border); color: var(--corner-text-color); padding: 5px 14px;
+      border-radius: 32px; cursor: pointer; opacity: 0.85; transition: 0.2s; z-index: 3000;
+      font-weight: 500; -webkit-tap-highlight-color: transparent;
+    }
     .theme-toggle:hover { opacity: 1; background: var(--btn-hover-bg); }
 
     .main-panel { max-width: 1400px; width: 100%; background: var(--panel-bg); border-radius: 28px; box-shadow: 0 16px 30px -8px rgba(30, 65, 90, 0.18); border: 1px solid var(--panel-border); padding: 20px 24px 24px; display: flex; flex-direction: column; max-height: calc(100vh - 24px); overflow: hidden; }
     .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--panel-border); flex-shrink: 0; }
     .header h1 { font-weight: 550; font-size: 1.9rem; color: var(--title-color); }
-    .back-btn { background: var(--btn-bg); border: 1px solid var(--btn-border); color: var(--btn-color); padding: 10px 20px; border-radius: 40px; font-weight: 520; font-size: 0.95rem; text-decoration: none; box-shadow: 0 3px 6px rgba(50, 85, 110, 0.05); transition: 0.15s; cursor: pointer; }
-    .back-btn:hover { background: var(--btn-hover-bg); border-color: #7fa5c5; transform: translateY(-1px); }
+    .back-btn {
+      background: var(--btn-bg); border: 1px solid var(--btn-border); color: var(--btn-color);
+      padding: 8px 18px; border-radius: 36px; font-weight: 520; font-size: 0.95rem; text-decoration: none;
+      transition: 0.15s; -webkit-tap-highlight-color: transparent;
+    }
+    .back-btn:hover { background: var(--btn-hover-bg); }
 
     .tabs { display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid var(--panel-border); padding-bottom: 8px; flex-shrink: 0; }
-    .tab { background: transparent; border: none; padding: 12px 28px; font-size: 1.15rem; font-weight: 550; color: var(--corner-text-color); cursor: pointer; border-radius: 40px 40px 0 0; transition: 0.15s; }
+    .tab { background: transparent; border: none; padding: 12px 28px; font-size: 1.15rem; font-weight: 550; color: var(--corner-text-color); cursor: pointer; border-radius: 40px 40px 0 0; transition: 0.15s; -webkit-tap-highlight-color: transparent; }
     .tab.active { background: var(--tab-active-bg); color: var(--title-color); box-shadow: 0 -2px 6px rgba(0,0,0,0.02); border: 1px solid var(--panel-border); border-bottom: none; }
     .tab:hover:not(.active) { background: rgba(224, 236, 246, 0.5); }
 
     .editor-container { border: 1px solid var(--panel-border); border-radius: 24px; margin-bottom: 20px; background: var(--editor-bg); flex: 1; min-height: 0; overflow: auto !important; -webkit-overflow-scrolling: touch; }
-    .CodeMirror { height: auto; min-height: 100%; font-size: 15px; font-family: 'JetBrains Mono', monospace; background: transparent !important; user-select: text !important; -webkit-user-select: text !important; line-height: 1.5; color: var(--text-color); }
+    .CodeMirror { height: auto; min-height: 100%; font-size: 15px; font-family: 'JetBrains Mono', monospace; background: transparent !important; color: var(--text-color); }
     .CodeMirror-scroll { overflow: visible !important; height: auto; }
-    .CodeMirror-sizer { min-height: 100%; }
-    .CodeMirror textarea { -webkit-user-select: text !important; user-select: text !important; }
-
-    .cm-s-default .cm-tag { color: #d32f2f; }
-    .cm-s-default .cm-bracket { color: #888888; }
-    .cm-s-default .cm-attribute { color: #f5a623; }
-    .cm-s-default .cm-string { color: #2e7d32; }
-    .cm-s-default .cm-comment { color: #6a9955; font-style: italic; }
-    .cm-s-default .cm-keyword { color: #2e7d32; }
-    .cm-s-default .cm-variable { color: #2e7d32; }
-    .cm-s-default .cm-number { color: #2e7d32; }
-    .cm-s-default .cm-operator { color: #2e7d32; }
-    .cm-s-default .cm-property { color: #2e7d32; }
-    .cm-s-default .cm-def { color: #2e7d32; }
-    .cm-s-default .cm-meta { color: #2e7d32; }
-    .cm-s-default .cm-atom { color: #2e7d32; }
-    .cm-s-default .cm-text { color: #000000; }
-    [data-theme="dark"] .cm-s-default .cm-text { color: #e0e8f0; }
-    [data-theme="dark"] .cm-s-default .cm-bracket { color: #aaaaaa; }
+    .cm-s-default .cm-tag { color: #d32f2f; } .cm-s-default .cm-bracket { color: #888; } .cm-s-default .cm-attribute { color: #f5a623; }
+    .cm-s-default .cm-string { color: #2e7d32; } .cm-s-default .cm-keyword { color: #2e7d32; } .cm-s-default .cm-variable { color: #2e7d32; }
+    .cm-s-default .cm-text { color: #000; } [data-theme="dark"] .cm-s-default .cm-text { color: #e0e8f0; }
 
     .preview-container { border: 1px solid var(--panel-border); border-radius: 24px; overflow: hidden; background: var(--preview-bg); flex: 1; min-height: 300px; display: none; }
     .preview-container iframe { width: 100%; height: 100%; border: none; background: white; overflow: auto; -webkit-overflow-scrolling: touch; }
     [data-theme="dark"] .preview-container iframe { background: #0a0f14; }
 
     .action-bar { display: flex; gap: 14px; margin-top: 12px; align-items: center; flex-shrink: 0; }
-    .primary-btn { background: var(--go-btn-bg); color: white; border: none; padding: 14px 32px; border-radius: 48px; font-weight: 600; font-size: 1.05rem; box-shadow: 0 5px 10px rgba(46,84,112,0.15); cursor: pointer; transition: 0.15s; }
-    .primary-btn:hover { background: var(--go-btn-hover-bg); transform: scale(1.02); }
-    .secondary-btn { background: var(--btn-bg); border: 1px solid var(--btn-border); color: var(--btn-color); padding: 12px 24px; border-radius: 48px; font-weight: 520; cursor: pointer; transition: 0.15s; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-    .secondary-btn:hover { background: var(--btn-hover-bg); border-color: #7b9fc2; transform: translateY(-1px); }
+    .nav-btn {
+      background: var(--go-btn-bg); border: none; color: white; padding: 14px 32px;
+      border-radius: 48px; font-weight: 600; font-size: 1.05rem; cursor: pointer;
+      box-shadow: 0 5px 10px rgba(46,84,112,0.15); transition: 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .nav-btn.secondary {
+      background: var(--btn-bg); border: 1px solid var(--btn-border); color: var(--btn-color);
+      padding: 12px 24px; box-shadow: none;
+    }
+    .nav-btn:hover { background: var(--go-btn-hover-bg); }
+    .nav-btn.secondary:hover { background: var(--btn-hover-bg); }
     .status { margin-left: auto; color: var(--corner-text-color); font-size: 0.9rem; opacity: 0.9; }
   </style>
 </head>
@@ -111,84 +111,78 @@
 <div class="corner-tl">不自由毋宁死 · 不自由毋寧死 · Give me liberty or give me death · 自由か、死か</div>
 <div class="corner-tr" id="fpsDisplay">FPS: --</div>
 <div class="corner-br">made by ZZC-jeizuchin, Github</div>
-<button class="theme-toggle" id="themeToggle" aria-label="切换深色模式">🌙 深色</button>
+<button class="theme-toggle" id="themeToggle" aria-label="切换深色模式">深色</button>
 
 <div class="main-panel">
-  <div class="header"><h1>SwC IDE · 增强版</h1><a href="index.html" class="back-btn">返回 SwCTools 主站</a></div>
+  <div class="header"><h1>SwC IDE · 增强版</h1><a href="index.html" class="back-btn">← 返回主站</a></div>
   <div class="tabs"><button class="tab active" data-tab="editor">编辑器</button><button class="tab" data-tab="preview">预览</button></div>
   <div class="editor-container" id="editorContainer"><textarea id="htmlCode" style="display:none;"></textarea></div>
   <div class="preview-container" id="previewContainer"><iframe id="previewFrame" sandbox="allow-scripts allow-same-origin" title="预览"></iframe></div>
   <div class="action-bar">
-    <button class="primary-btn" id="runBtn">运行并预览</button>
-    <button class="secondary-btn" id="saveBtn">保存当前代码</button>
-    <button class="secondary-btn" id="resetBtn">重置为默认</button>
+    <button class="nav-btn" id="runBtn">运行并预览</button>
+    <button class="nav-btn secondary" id="saveBtn">保存当前代码</button>
+    <button class="nav-btn secondary" id="resetBtn">重置为默认</button>
     <span class="status" id="statusMsg"></span>
   </div>
 </div>
 
 <script>
-(function(){"use strict";
+  (function(){
+    "use strict";
+    const themeToggle = document.getElementById('themeToggle');
+    const currentTheme = localStorage.getItem('swc_theme') || 'light';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    themeToggle.textContent = currentTheme === 'light' ? '深色' : '亮色';
+    themeToggle.addEventListener('click', () => {
+      const newTheme = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('swc_theme', newTheme);
+      themeToggle.textContent = newTheme === 'light' ? '深色' : '亮色';
+    });
 
-// 深色模式
-const themeToggle = document.getElementById('themeToggle');
-const currentTheme = localStorage.getItem('swc_theme') || 'light';
-document.documentElement.setAttribute('data-theme', currentTheme);
-themeToggle.textContent = currentTheme === 'light' ? '🌙 深色' : '☀️ 亮色';
-themeToggle.addEventListener('click', () => {
-  const newTheme = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-  document.documentElement.setAttribute('data-theme', newTheme);
-  localStorage.setItem('swc_theme', newTheme);
-  themeToggle.textContent = newTheme === 'light' ? '🌙 深色' : '☀️ 亮色';
-});
+    const fpsDisplay = document.getElementById('fpsDisplay');
+    let frameCount = 0, lastFpsUpdate = performance.now();
+    function updateFPS() { frameCount++; const now = performance.now(); if(now - lastFpsUpdate >= 1000) { fpsDisplay.textContent = `FPS: ${Math.round((frameCount * 1000) / (now - lastFpsUpdate))}`; frameCount = 0; lastFpsUpdate = now; } requestAnimationFrame(updateFPS); }
+    requestAnimationFrame(updateFPS);
 
-// 帧率
-const fpsDisplay = document.getElementById('fpsDisplay');
-let frameCount = 0, lastFpsUpdate = performance.now();
-function updateFPS() { frameCount++; const now = performance.now(); if(now - lastFpsUpdate >= 1000) { fpsDisplay.textContent = `FPS: ${Math.round((frameCount * 1000) / (now - lastFpsUpdate))}`; frameCount = 0; lastFpsUpdate = now; } requestAnimationFrame(updateFPS); }
-requestAnimationFrame(updateFPS);
-
-const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-const VOID_TAGS = new Set(['area','base','br','col','command','embed','hr','img','input','keygen','link','meta','param','source','track','wbr']);
-
-const textarea = document.getElementById('htmlCode');
-const editor = CodeMirror.fromTextArea(textarea, {
-  mode: 'htmlmixed', theme: 'default', lineNumbers: true, autoCloseTags: true, autoCloseBrackets: true, matchTags: { bothTags: true },
-  indentUnit: 4, tabSize: 4, indentWithTabs: false, smartIndent: true, lineWrapping: true, styleActiveLine: true, foldGutter: true,
-  gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'], readOnly: false, disableInput: false,
-  inputStyle: isMobile ? 'textarea' : 'contenteditable', autofocus: false,
-  extraKeys: { 'Enter': function(cm) {
-    const cursor = cm.getCursor(), line = cm.getLine(cursor.line), ch = cursor.ch;
-    if(ch > 0 && line.charAt(ch-1) === '>') {
-      const beforeCursor = line.substring(0, ch), tagMatch = beforeCursor.match(/<(\w+)(?:\s[^>]*)?>$/);
-      if(tagMatch) { const tagName = tagMatch[1].toLowerCase(); if(!VOID_TAGS.has(tagName)) {
-        const indent = line.match(/^\s*/)[0], innerIndent = indent + '    ';
-        cm.replaceSelection('\n' + innerIndent + '\n' + indent + '</' + tagName + '>');
-        cm.setCursor({ line: cursor.line + 1, ch: innerIndent.length }); return;
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const VOID_TAGS = new Set(['area','base','br','col','command','embed','hr','img','input','keygen','link','meta','param','source','track','wbr']);
+    const textarea = document.getElementById('htmlCode');
+    const editor = CodeMirror.fromTextArea(textarea, {
+      mode: 'htmlmixed', theme: 'default', lineNumbers: true, autoCloseTags: true, autoCloseBrackets: true, matchTags: { bothTags: true },
+      indentUnit: 4, tabSize: 4, indentWithTabs: false, smartIndent: true, lineWrapping: true, styleActiveLine: true,
+      gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'], foldGutter: true, inputStyle: isMobile ? 'textarea' : 'contenteditable',
+      extraKeys: { 'Enter': function(cm) {
+        const cursor = cm.getCursor(), line = cm.getLine(cursor.line), ch = cursor.ch;
+        if(ch > 0 && line.charAt(ch-1) === '>') {
+          const before = line.substring(0, ch), tag = before.match(/<(\w+)(?:\s[^>]*)?>$/);
+          if(tag && !VOID_TAGS.has(tag[1].toLowerCase())) {
+            const indent = line.match(/^\s*/)[0], inner = indent + '    ';
+            cm.replaceSelection('\n' + inner + '\n' + indent + '</' + tag[1] + '>');
+            cm.setCursor({ line: cursor.line+1, ch: inner.length }); return;
+          }
+        } cm.execCommand('newlineAndIndent');
       }}
-    } cm.execCommand('newlineAndIndent');
-  }}
-});
-editor.setSize(null, '100%');
-const editorContainer = document.getElementById('editorContainer'); editorContainer.style.display = 'block';
-document.querySelector('.CodeMirror').style.backgroundColor = 'transparent';
-editor.on('beforeChange', (cm, change) => { if(change.origin === '+input' && change.text.length === 1 && change.text[0] === '<') { change.cancel(); const cursor = cm.getCursor(); cm.replaceRange('<>', cursor, cursor); cm.setCursor({ line: cursor.line, ch: cursor.ch + 1 }); } });
-if(isMobile) { editor.on('keydown', (cm, e) => { if(e.key === 'Backspace' || e.key === 'Delete') { const cursor = cm.getCursor(), line = cm.getLine(cursor.line), isEmpty = line.trim() === '', atStart = cursor.ch === 0, atEnd = cursor.ch === line.length; if((e.key === 'Backspace' && atStart && isEmpty) || (e.key === 'Delete' && atEnd && isEmpty)) { e.preventDefault(); cm.lineCount() > 1 ? cm.replaceRange('', { line: cursor.line, ch: 0 }, { line: cursor.line + 1, ch: 0 }) : cm.replaceRange('', { line: cursor.line, ch: 0 }, { line: cursor.line, ch: line.length }); cm.focus(); } else setTimeout(()=>cm.focus(), 10); } }); }
+    });
+    editor.setSize(null, '100%');
+    editor.on('beforeChange', (cm, change) => { if(change.origin==='+input' && change.text.length===1 && change.text[0]==='<') { change.cancel(); const c=cm.getCursor(); cm.replaceRange('<>',c,c); cm.setCursor({line:c.line,ch:c.ch+1}); } });
+    if(isMobile) editor.on('keydown', (cm, e) => { if(e.key==='Backspace'||e.key==='Delete') { const c=cm.getCursor(), l=cm.getLine(c.line), empty=l.trim()==='', atStart=c.ch===0, atEnd=c.ch===l.length; if((e.key==='Backspace'&&atStart&&empty)||(e.key==='Delete'&&atEnd&&empty)) { e.preventDefault(); cm.lineCount()>1?cm.replaceRange('',{line:c.line,ch:0},{line:c.line+1,ch:0}):cm.replaceRange('',{line:c.line,ch:0},{line:c.line,ch:l.length}); cm.focus(); } else setTimeout(()=>cm.focus(),10); } });
 
-const STORAGE_KEY = 'swc_standalone_ide_code', DEFAULT_CODE = `<!DOCTYPE html>\n<html>\n<head>\n  <meta charset="UTF-8">\n  <title>新页面</title>\n  <style>\n    body { font-family: sans-serif; padding: 20px; background: #f0f4f8; }\n    h1 { color: #1e4b6e; }\n  </style>\n</head>\n<body>\n  <h1>Hello, SwC!</h1>\n  <p>开始编辑你的 HTML 吧～</p>\n</body>\n</html>`;
-const previewFrame = document.getElementById('previewFrame'), previewContainer = document.getElementById('previewContainer'), runBtn = document.getElementById('runBtn'), saveBtn = document.getElementById('saveBtn'), resetBtn = document.getElementById('resetBtn'), statusMsg = document.getElementById('statusMsg');
-const tabs = document.querySelectorAll('.tab');
-tabs.forEach(t=>t.addEventListener('click', ()=>{ const target = t.dataset.tab; tabs.forEach(b=>b.classList.remove('active')); t.classList.add('active'); if(target==='editor') { editorContainer.style.display='block'; previewContainer.style.display='none'; editor.refresh(); } else { editorContainer.style.display='none'; previewContainer.style.display='block'; updatePreview(); } }));
-function updatePreview() { const code = editor.getValue(), doc = previewFrame.contentDocument || previewFrame.contentWindow.document; doc.open(); doc.write(code); doc.close(); }
-function loadCode() { try { editor.setValue(localStorage.getItem(STORAGE_KEY) || DEFAULT_CODE); updatePreview(); statusMsg.textContent='已加载'; setTimeout(()=>statusMsg.textContent='',1500); } catch { editor.setValue(DEFAULT_CODE); } }
-function saveCode() { try { localStorage.setItem(STORAGE_KEY, editor.getValue()); statusMsg.textContent='已保存'; setTimeout(()=>statusMsg.textContent='',1500); } catch { statusMsg.textContent='保存失败'; } }
-function resetCode() { editor.setValue(DEFAULT_CODE); updatePreview(); statusMsg.textContent='已重置'; setTimeout(()=>statusMsg.textContent='',1500); }
-editor.on('change', ()=>{ clearTimeout(window._saveTimer); window._saveTimer = setTimeout(()=>{ saveCode(); if(previewContainer.style.display==='block') updatePreview(); }, 800); });
-runBtn.addEventListener('click', ()=>{ saveCode(); updatePreview(); tabs.forEach(t=>t.classList.remove('active')); document.querySelector('[data-tab="preview"]').classList.add('active'); editorContainer.style.display='none'; previewContainer.style.display='block'; });
-saveBtn.addEventListener('click', saveCode); resetBtn.addEventListener('click', resetCode);
-loadCode(); editorContainer.style.display='block'; previewContainer.style.display='none';
-window.addEventListener('resize', ()=>editor.refresh());
-
-})();
+    const STORAGE_KEY = 'swc_standalone_ide_code', DEFAULT_CODE = `<!DOCTYPE html>\n<html>\n<head>\n  <meta charset="UTF-8">\n  <title>新页面</title>\n  <style>\n    body { font-family: sans-serif; padding: 20px; background: #f0f4f8; }\n    h1 { color: #1e4b6e; }\n  </style>\n</head>\n<body>\n  <h1>Hello, SwC!</h1>\n  <p>开始编辑你的 HTML 吧～</p>\n</body>\n</html>`;
+    const previewFrame = document.getElementById('previewFrame'), previewContainer = document.getElementById('previewContainer'), editorContainer = document.getElementById('editorContainer');
+    const runBtn = document.getElementById('runBtn'), saveBtn = document.getElementById('saveBtn'), resetBtn = document.getElementById('resetBtn'), statusMsg = document.getElementById('statusMsg');
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(t => t.addEventListener('click', () => { const target = t.dataset.tab; tabs.forEach(b=>b.classList.remove('active')); t.classList.add('active'); if(target==='editor'){ editorContainer.style.display='block'; previewContainer.style.display='none'; editor.refresh(); } else { editorContainer.style.display='none'; previewContainer.style.display='block'; updatePreview(); } }));
+    function updatePreview() { const code = editor.getValue(), doc = previewFrame.contentDocument || previewFrame.contentWindow.document; doc.open(); doc.write(code); doc.close(); }
+    function loadCode() { try { editor.setValue(localStorage.getItem(STORAGE_KEY) || DEFAULT_CODE); updatePreview(); statusMsg.textContent='已加载'; setTimeout(()=>statusMsg.textContent='',1500); } catch { editor.setValue(DEFAULT_CODE); } }
+    function saveCode() { try { localStorage.setItem(STORAGE_KEY, editor.getValue()); statusMsg.textContent='已保存'; setTimeout(()=>statusMsg.textContent='',1500); } catch { statusMsg.textContent='保存失败'; } }
+    function resetCode() { editor.setValue(DEFAULT_CODE); updatePreview(); statusMsg.textContent='已重置'; setTimeout(()=>statusMsg.textContent='',1500); }
+    editor.on('change', () => { clearTimeout(window._saveTimer); window._saveTimer = setTimeout(()=>{ saveCode(); if(previewContainer.style.display==='block') updatePreview(); }, 800); });
+    runBtn.addEventListener('click', ()=>{ saveCode(); updatePreview(); tabs.forEach(t=>t.classList.remove('active')); document.querySelector('[data-tab="preview"]').classList.add('active'); editorContainer.style.display='none'; previewContainer.style.display='block'; });
+    saveBtn.addEventListener('click', saveCode); resetBtn.addEventListener('click', resetCode);
+    loadCode(); editorContainer.style.display='block'; previewContainer.style.display='none';
+    window.addEventListener('resize', ()=> editor.refresh());
+  })();
 </script>
 </body>
 </html>
